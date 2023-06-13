@@ -38,7 +38,7 @@
             }).then(function(obj) {
                 console.log(obj);
                 obj.forEach(entry => {
-                    addRow(entry.rank, entry.username, entry.time, entry.replay_id)
+                    addRow(entry.rank, entry.username, entry.time / 1000, entry.replay_id)
                 });
             }).catch(function(error) {
                 console.error('idk something bad happened.');
