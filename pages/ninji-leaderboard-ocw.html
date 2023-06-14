@@ -3,9 +3,20 @@
     <head>
         <title>Leaderboard</title>
         <style>
+            @font-face {
+                font-family: SMM;
+                src: url('../fonts/Super Mario Maker Font.ttf');
+            }
+             
+            h1 {
+                text-align: center;
+                font-family: SMM;
+            }
+
             table {
                 width: 100%;
                 border-collapse: collapse;
+                font-family: SMM;
             }
 
             th, td {
@@ -36,27 +47,23 @@
             fetch('https://server.opencourse.world/ninji-leaderboard.json').then(function(response) {
                 return response.json();
             }).then(function(obj) {
-                console.log(obj);
                 obj.forEach(entry => {
-                    addRow(entry.rank, entry.username, entry.time / 1000, entry.replay_id)
+                    addRow(entry.rank, entry.username, (entry.time/1000).toFixed(3), entry.replay_id)
                 });
             }).catch(function(error) {
-                console.error('idk something bad happened.');
+                console.error('something bad happened, unfortunately i don\'t know why :(');
                 console.error(error);
             })
 
             function addRow(c1, c2, c3, c4) {
                 var table = document.getElementById("board");
-
                 var row = table.insertRow();
-                var cell1 = row.insertCell(0);
-                var cell2 = row.insertCell(1);
-                var cell3 = row.insertCell(2);
-                var cell4 = row.insertCell(3);
-                cell1.innerHTML = c1;
-                cell2.innerHTML = c2;
-                cell3.innerHTML = c3;
-                cell4.innerHTML = c4;
+
+                var info = [c1, c2, c3, c4];
+                info.forEach((item, index) => { // note to self, item = `info[i]` and index = `i` like `for (i in ...)`
+                    var cell = row.insertCell(index);
+                    cell.innerHTML = item;
+                });
             }
         </script>
     </body>
