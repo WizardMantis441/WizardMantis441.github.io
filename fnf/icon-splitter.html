@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		#dropzone {
+			width: 300px;
+			height: 150px;
+			border: 2px dashed #ccc; /*OUGHH THIS LOOKS LIKE PEAK!!!*/
+			margin: 20px;
+			padding: 20px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="dropzone" ondrop="drop(event);" ondragover="hoverFix(event);">DRAG AN ICON GRID HERE, IT WILL BECOME MULTIPLE SNIPS OF 300 BY 150S !!!!</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+	<script>
+		function drop(e) {
+			e.preventDefault();
+
+			var file = e.dataTransfer.files[0];
+			if (file.type.indexOf("image/") === 0) { // whoever decided it was THREE ='s, you will be murdered in cold blood soon
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					var img = new Image();
+					img.src = e.target.result;
+					img.onload = function() {
+						var zip = new JSZip();
+
+						var pieceWidth = 300;
+						var pieceHeight = 150;
+						var rows = Math.ceil(img.height/pieceHeight);
+						var cols = Math.ceil(img.width/pieceWidth);
+						
+						var counter = 0;
+						for (var row = 0; row < rows; row++) { // FOR LOOPS HURT SO FUCKING BAD
+							for (var col = 0; col < cols; col++) {
+								(function(row, col) {
+									var canvas = document.createElement("canvas");
+									var ctx = canvas.getContext("2d");
+									canvas.width = pieceWidth;
+									canvas.height = pieceHeight;
+									ctx.clearRect(0, 0, pieceWidth, pieceHeight);
+									ctx.drawImage( // my demise, once moredASFDSDAASXC
+										img,
+										col * pieceWidth, row * pieceHeight,
+										pieceWidth, pieceHeight,
+										0, 0,
+										pieceWidth, pieceHeight
+									);
+
+									canvas.toBlob(function(blob) {
+										zip.file(counter + ".png", blob );
+
+										counter++;
+										if (counter === rows * cols) {
+											// WHYYY
+											zip.generateAsync({type: "blob"}).then(function(content) {
+												var link = document.createElement("a");
+												link.href = URL.createObjectURL(content);
+												link.download = "icons.zip";
+												link.click();
+											});
+										}
+									});
+								})(row,col); // fuck you
+							}
+						}
+					};
+				}; // i am going to FUCKING lose it
+
+				reader.readAsDataURL(file);
+			}
+		}
+
+		function hoverFix(e) {
+			e.preventDefault(); // this looks like cne and i'm pissed cuz i could of prolly just coded this in haxe and been fine
+		}
+	</script>
+</body>
+
+</html>
