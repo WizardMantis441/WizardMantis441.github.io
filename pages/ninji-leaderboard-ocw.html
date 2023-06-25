@@ -69,16 +69,16 @@
 
 <body>
     <div class="container">
-        <h1>Leaderboard</h1>
+        <h1>Leaderboard - "A little Red in an Emerald World"</h1>
         <div id="board"></div>
     </div>
 
     <footer>
-        (v1.3) hi i am a footer :)
+        (v1.4) updated to "a little red in an emerald world" lol!!
     </footer>
 
     <script>
-        fetch('https://server.opencourse.world/ninji-leaderboard.json').then(function (response) {
+        fetch('https://server.opencourse.world/ninji-leaderboard/1000002330.json').then(function (response) {
                 return response.json();
             }).then(function (obj) {
                 obj.forEach(entry => {
