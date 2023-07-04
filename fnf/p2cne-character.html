@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CNE Character Converter</title>
+    <body>
+        <h1>Psych JSON to CNE XML - Character Converter (UNFINISHED GRAHHH)</h1>
+
+        <label for="jsonInput">JSON Input:</label><br>
+        <textarea id="jsonInput" rows="10" cols="50"></textarea>
+        <br>
+        
+        <button onclick="convertToXML()">Convert to XML</button>
+        <br>
+        <br>
+        
+        <label for="xmlOutput">XML Output:</label><br>
+        <textarea id="xmlOutput" rows="10" cols="50" readonly></textarea>
+
+        <h6>v1) yeah so indices in anims don't work yet :( i will get to that soon!!!!!!!</h6>
+    </body>
+    <script>
+        function convertToXML() {
+            // TODO:
+            // - image
+            // - icon
+            // - healthbar
+            //      - adding "optional" tags, basically buttons to choose if you wanna add specific things yk
+            // - anim indices
+            
+            // side note, remake this into "Open File" and "Open Folder" buttons instead, copy pasting is stupid as FUCK!
+
+            var json = JSON.parse(document.getElementById("jsonInput").value);
+            var xmlOutput = "<!DOCTYPE codename-engine-character> <!-- Made with WizardMantis's Character Converter -->\n<character";
+
+            if (json.no_antialiasing) xmlOutput +=" antialiasing=\"false\"";
+            // image
+            if (json.position[0] !== 0) xmlOutput += " x=\"" + json.position[0] + "\"";
+            if (json.position[1] !== 0) xmlOutput += " y=\"" + json.position[1] + "\"";
+            // icon
+            if (json.flip_x) xmlOutput += " flipx=\"true\"";
+            // healthbar
+            if (json.camera_position[0] !== 0) xmlOutput += " camx=\"" + json.camera_position[0] + "\"";
+            if (json.camera_position[1] !== 0) xmlOutput += " camy=\"" + json.camera_position[1] + "\"";
+            if (json.sing_duration !== 4) xmlOutput += " holdTime=\"" + json.sing_duration + "\"";
+            if (json.scale !== 1) xmlOutput += " scale=\"" + json.scale + "\"";
+
+            xmlOutput += ">\n"
+
+            json.animations.forEach(function (a) {
+                xmlOutput += "\t<anim";
+                xmlOutput += " name=\"" + a.anim + "\"";
+                xmlOutput += " anim=\"" + a.name + "\"";
+                if (a.offsets[0] !== 0) xmlOutput += " x=\"" + a.offsets[0] + "\"";
+                if (a.offsets[1] !== 0) xmlOutput += " y=\"" + a.offsets[1] + "\"";
+                if (a.fps !== 24) xmlOutput += " fps=\"" + a.fps + "\"";
+                if (a.loop) xmlOutput += " loop=\"true\"";
+                // if (a.indices.length !== 0) xmlOutput += " indices=\"" + a.indices + "\"";
+                xmlOutput += '/>\n'
+            });
+
+            /*
+            if "indices" in anim:
+                indices = str(anim["indices"]).strip('[]')
+                new_xml += f' indices="{indices}"'
+            */
+
+            xmlOutput += "</character>";
+
+            document.getElementById("xmlOutput").value = xmlOutput;
+        }
+    </script>
+</head>
+</html>
