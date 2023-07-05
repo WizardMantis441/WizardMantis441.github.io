@@ -1,80 +1,120 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>CNE Character Converter</title>
-    <body>
-        <h1>friday night funkin psych engine json character but it automatically converts into a friday night funkin codename engine xml character format in which you can use in friday night funkin codename engine this is awesome i think (UNFINISHED GRAHHH)</h1>
+	<title>CNE Character Converter</title>
+	<body>
+		<h1>friday night funkin psych engine json character but it automatically converts into a friday night funkin codename engine xml character format in which you can use in friday night funkin codename engine this is awesome i think (UNFINISHED GRAHHH)</h1>
 
-        <label for="fileInput">Select JSON File:</label>
-        <br>
-        <input type="file" id="fileInput">
-        <br>
-        <button onclick="convertFile()">Convert File</button>
-        <!-- <br>
+		<label for="fileInput">Select JSON File:</label>
+		<br>
+		<input type="file" id="fileInput" >
+		<br>
+		<button onclick="cFile()">Convert File</button>
 
-        <br>
+		<br>
+		<br>
 
-        <label for="folderInput">Select Folder (with JSON files):</label><br>
-        <input type="file" id="folderInput">
-        <br>
-        <button onclick="convertFolder()">Convert Folder</button> -->
+		<label for="folderInput">Select Folder (with JSON files):</label>
+		<br>
+		<input type="file" id="folderInput" webkitdirectory directory multiple>
+		<br>
+		<button onclick="cFolder()">Convert Folder</button>
 
-        <script src = "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin = "anonymous" referrerpolicy = "no-referrer"> </script>
-    </body>
-    <script>
-        function convertFile() {
-            var file = document.getElementById('fileInput').files[0];
+		<script src = "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin = "anonymous" referrerpolicy = "no-referrer"> </script>
+		<script src = "https://cdn.jsdelivr.net/npm/jszip@3.6.0/dist/jszip.min.js"></script>
+	</body>
+	<script>
+		function cFile() {
+			console.trace('converting a file lol');
+			var file = document.getElementById('fileInput').files[0];
 
-            var reader = new FileReader();
-            reader.onload = function(event) {
-                var blob = new Blob([convert(JSON.parse(event.target.result))], {
-                    type: "text/plain;charset=utf-8"
-                });
-                saveAs(blob, file.name.replace('.json', '.xml'));
-            };
-            reader.readAsText(file);
-        }
+			var reader = new FileReader();
+			reader.onload = function(event) {
+				var blob = new Blob([convert(event.target.result)], {
+					type: "text/plain;charset=utf-8"
+				});
+				saveAs(blob, file.name.replace('.json', '.xml'));
+			};
+			reader.readAsText(file);
+		}
 
-        // function convertFolder() {}
+		function cFolder() {
+			console.trace('converting a folder lol');
+			const files = document.getElementById('folderInput').files;
 
-        function convert(json) {
-            var xmlOutput = "<!DOCTYPE codename-engine-character> <!-- Made with WizardMantis's Character Converter -->\n<character";
+			var promises = [];
 
-            if (json.no_antialiasing) xmlOutput +=" antialiasing=\"false\"";
-            // image
-            if (json.position[0] !== 0) xmlOutput += " x=\"" + json.position[0] + "\"";
-            if (json.position[1] !== 0) xmlOutput += " y=\"" + json.position[1] + "\"";
-            // icon
-            if (json.flip_x) xmlOutput += " flipx=\"true\"";
-            // healthbar
-            if (json.camera_position[0] !== 0) xmlOutput += " camx=\"" + json.camera_position[0] + "\"";
-            if (json.camera_position[1] !== 0) xmlOutput += " camy=\"" + json.camera_position[1] + "\"";
-            if (json.sing_duration !== 4) xmlOutput += " holdTime=\"" + json.sing_duration + "\"";
-            if (json.scale !== 1) xmlOutput += " scale=\"" + json.scale + "\"";
+			function conve(file) {
+				return new Promise((resolve, reject) => {
+					var reader = new FileReader();
+					reader.onload = function(event) {
+						// convertedFiles.push([file.name.replace('.json', '.lua'), convert(event.target.result)]);
+						zip.file(file.name.replace('.json', '.xml'), convert(event.target.result));
+						console.log('converted ' + file.name);
+						resolve("wiz likes furries");
+					};
+					reader.readAsText(file);
+				});
+			}
 
-            xmlOutput += ">\n"
+			var zip = new JSZip();
 
-            json.animations.forEach(function (a) {
-                xmlOutput += "\t<anim";
-                xmlOutput += " name=\"" + a.anim + "\"";
-                xmlOutput += " anim=\"" + a.name + "\"";
-                if (a.offsets[0] !== 0) xmlOutput += " x=\"" + a.offsets[0] + "\"";
-                if (a.offsets[1] !== 0) xmlOutput += " y=\"" + a.offsets[1] + "\"";
-                if (a.fps !== 24) xmlOutput += " fps=\"" + a.fps + "\"";
-                if (a.loop) xmlOutput += " loop=\"true\"";
-                // if (a.indices.length !== 0) xmlOutput += " indices=\"" + a.indices + "\"";
-                /*
-                if "indices" in anim:
-                    indices = str(anim["indices"]).strip('[]')
-                    new_xml += f' indices="{indices}"'
-                */
-                xmlOutput += '/>\n'
-            });
+			const currDate = new Date();
+			const dateWithOffset = new Date(currDate.getTime() - currDate.getTimezoneOffset() * 60000);
+			JSZip.defaults.date = dateWithOffset;
 
-            xmlOutput += "</character>";
+			for (let i = 0; i < files.length; i++) {
+				const file = files[i];
 
-            return xmlOutput;
-        }
-    </script>
+				if (file.name.includes('.json')) {
+					promises.push(conve(file));
+				} else {
+					console.error(file.name + ' is NOT A JSON FILE!!!! FUCK YOU!!!!!');
+				}
+			}
+
+			Promise.all(promises).then((values) => {
+				zip.generateAsync({type:"blob"}).then(function(content) {
+					saveAs(content, "characters.zip");
+				});
+			});
+		}
+
+		function convert(jsonInput) {
+			var json = JSON.parse(jsonInput);
+
+			var xmlOutput = "<!DOCTYPE codename-engine-character> <!-- Made with WizardMantis's Character Converter -->\n<character";
+
+			if (json.no_antialiasing) xmlOutput +=" antialiasing=\"false\"";
+			// image
+			if (json.position[0] !== 0) xmlOutput += " x=\"" + json.position[0] + "\"";
+			if (json.position[1] !== 0) xmlOutput += " y=\"" + json.position[1] + "\"";
+			// icon
+			if (json.flip_x) xmlOutput += " flipx=\"true\"";
+			// healthbar
+			if (json.camera_position[0] !== 0) xmlOutput += " camx=\"" + json.camera_position[0] + "\"";
+			if (json.camera_position[1] !== 0) xmlOutput += " camy=\"" + json.camera_position[1] + "\"";
+			if (json.sing_duration !== 4) xmlOutput += " holdTime=\"" + json.sing_duration + "\"";
+			if (json.scale !== 1) xmlOutput += " scale=\"" + json.scale + "\"";
+
+			xmlOutput += ">\n"
+
+			json.animations.forEach(function (a) {
+				xmlOutput += "\t<anim";
+				xmlOutput += " name=\"" + a.anim + "\"";
+				xmlOutput += " anim=\"" + a.name + "\"";
+				if (a.offsets[0] !== 0)     xmlOutput += " x=\"" + a.offsets[0] + "\"";
+				if (a.offsets[1] !== 0)     xmlOutput += " y=\"" + a.offsets[1] + "\"";
+				if (a.fps !== 24)           xmlOutput += " fps=\"" + a.fps + "\"";
+				if (a.loop)                 xmlOutput += " loop=\"true\"";
+				if (a.indices.length !== 0) xmlOutput += " indices=\"" + a.indices.join(",") + "\"";
+				xmlOutput += '/>\n'
+			});
+
+			xmlOutput += "</character>";
+
+			return xmlOutput;
+		}
+	</script>
 </head>
 </html>
