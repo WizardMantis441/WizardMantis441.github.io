@@ -3,33 +3,41 @@
 <head>
     <title>CNE Character Converter</title>
     <body>
-        <h1>Psych JSON to CNE XML - Character Converter (UNFINISHED GRAHHH)</h1>
+        <h1>friday night funkin psych engine json character but it automatically converts into a friday night funkin codename engine xml character format in which you can use in friday night funkin codename engine this is awesome i think (UNFINISHED GRAHHH)</h1>
 
-        <label for="jsonInput">JSON Input:</label><br>
-        <textarea id="jsonInput" rows="10" cols="50"></textarea>
+        <label for="fileInput">Select JSON File:</label>
         <br>
-        
-        <button onclick="convertToXML()">Convert to XML</button>
+        <input type="file" id="fileInput">
         <br>
-        <br>
-        
-        <label for="xmlOutput">XML Output:</label><br>
-        <textarea id="xmlOutput" rows="10" cols="50" readonly></textarea>
+        <button onclick="convertFile()">Convert File</button>
+        <!-- <br>
 
-        <h6>v1) yeah so indices in anims don't work yet :( i will get to that soon!!!!!!!</h6>
+        <br>
+
+        <label for="folderInput">Select Folder (with JSON files):</label><br>
+        <input type="file" id="folderInput">
+        <br>
+        <button onclick="convertFolder()">Convert Folder</button> -->
+
+        <script src = "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin = "anonymous" referrerpolicy = "no-referrer"> </script>
     </body>
     <script>
-        function convertToXML() {
-            // TODO:
-            // - image
-            // - icon
-            // - healthbar
-            //      - adding "optional" tags, basically buttons to choose if you wanna add specific things yk
-            // - anim indices
-            
-            // side note, remake this into "Open File" and "Open Folder" buttons instead, copy pasting is stupid as FUCK!
+        function convertFile() {
+            var file = document.getElementById('fileInput').files[0];
 
-            var json = JSON.parse(document.getElementById("jsonInput").value);
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var blob = new Blob([convert(JSON.parse(event.target.result))], {
+                    type: "text/plain;charset=utf-8"
+                });
+                saveAs(blob, file.name.replace('.json', '.xml'));
+            };
+            reader.readAsText(file);
+        }
+
+        // function convertFolder() {}
+
+        function convert(json) {
             var xmlOutput = "<!DOCTYPE codename-engine-character> <!-- Made with WizardMantis's Character Converter -->\n<character";
 
             if (json.no_antialiasing) xmlOutput +=" antialiasing=\"false\"";
@@ -55,18 +63,17 @@
                 if (a.fps !== 24) xmlOutput += " fps=\"" + a.fps + "\"";
                 if (a.loop) xmlOutput += " loop=\"true\"";
                 // if (a.indices.length !== 0) xmlOutput += " indices=\"" + a.indices + "\"";
+                /*
+                if "indices" in anim:
+                    indices = str(anim["indices"]).strip('[]')
+                    new_xml += f' indices="{indices}"'
+                */
                 xmlOutput += '/>\n'
             });
 
-            /*
-            if "indices" in anim:
-                indices = str(anim["indices"]).strip('[]')
-                new_xml += f' indices="{indices}"'
-            */
-
             xmlOutput += "</character>";
 
-            document.getElementById("xmlOutput").value = xmlOutput;
+            return xmlOutput;
         }
     </script>
 </head>
