@@ -8,3 +8,8 @@ list of current projects
 - [psych char to cne char converter](https://github.com/WizardMantis441/WizardMantis441.github.io/blob/main/fnf/p2cne-character.html), put in a psych json and it kinda makes a cne xml somewhat well?
 - (outdated) [ninji leaderboards](https://github.com/WizardMantis441/WizardMantis441.github.io/blob/main/ocw/ninji.html) - shout out ocw for having a goated community and helping me learn web making in general o7
 - literally my school notes (in progress)
+
+todo list
+- reorganize everything, maybe everything not code in `assets` and everything else in `source` or something
+- make my school notes
+- maybe figure out how to auto update the ninji boards? prolly not tho
