@@ -1,8 +1,9 @@
 <html>
   <head>
-    <link rel="stylesheet" href="/path/to/styles/default.css"/>
-    <script src="/path/to/highlight.pack.js"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/go.min.js"></script>
+    <script>hljs.highlightAll();</script>
   </head>
   <body>
     <main>
@@ -34,7 +35,7 @@
       <h2>1.4 - Becoming Familiar with Your Programming Environment (8)</h2>
       <ul>
         <li>Hello World - Simple Example (Annotated)</li>
-        <pre><code>
+        <pre><code class="language-java">
 public class HelloPrinter {
   public static void main(String[] args) {
     // Display a greeting in the console window
