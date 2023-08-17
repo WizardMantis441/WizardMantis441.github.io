@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-color: #333;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #funkin {
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <!-- Canvas centered in the middle of the screen -->
+        <canvas id="funkin" width="1280" height="720"></canvas>
+    </main>
+
+    <script>
+        var c = document.getElementById("funkin");
+
+        var cS0 = c.getContext("2d"); // cpuStrums
+        var cS1 = c.getContext("2d");
+        var cS2 = c.getContext("2d");
+        var cS3 = c.getContext("2d");
+
+        var pS0 = c.getContext("2d"); // playerStrums
+        var pS1 = c.getContext("2d");
+        var pS2 = c.getContext("2d");
+        var pS3 = c.getContext("2d");
+
+        var strums = [cS0, cS1, cS2, cS3, pS0, pS1, pS2, pS3];
+        var strumPositions = [97, 209, 321, 433, 737, 849, 961, 1073];
+        for (let i = 0; i < strumPositions.length; i++) {
+            strums[i].fillStyle = "gray";
+            strums[i].fillRect(strumPositions[i], 75, 109, 109);
+        }
+
+        class Note {
+            // i dont know :(
+        }
+    </script>
+</body>
+</html>
