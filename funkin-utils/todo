@@ -1,0 +1,62 @@
+the plan of the website is to eventually embed every resource into one useful place
+so temporarily it'll be links to useful things
+but eventually i wanna actually recreate / improve the things if possible
+overall i just wanna learn web development through this
+
+>> funkin
+- link to every page about it
+	- itch (https://ninja-muffin24.itch.io/funkin)
+		> embed most recent build? or like an easier button to them
+	- bandcamp (https://kawaisprite.bandcamp.com)
+	- github (https://github.com/FunkinCrew/funkin)
+	- wiki (https://funkincrew.github.io/funkin-modding-docs/)
+	- newgrounds (https://www.newgrounds.com/portal/view/770371)
+		> show last time updated?
+	- blog (https://funkin.me)
+		> show last time updated?
+	- kickstarter (https://www.kickstarter.com/projects/funkin/friday-night-funkin-the-full-ass-game)
+		> show last time updated?
+	- mod hosters
+		> imagine like a few extra things like a random button or a most recent button
+		- gamebanana (https://gamebanana.com/games/8694)
+		- gamejolt (https://gamejolt.com/games/tag-fnf)
+
+>> art / animation
+> ask around with artists on their most helpful tools / software
+- list of free softwares
+	- how to export to sparrow atlas / texture atlas if needed
+- list of tutorials
+- spritesheet generator (https://gamebanana.com/tools/7136)
+- spritesheet packer (https://neeeoo.github.io/funkin-packer/)
+
+>> music
+- list of free softwares
+- list of tutorials
+- list of music packs / instruments
+- general music theory information
+	> scale helper?
+	> chords?
+
+>> coding
+- list of free ide's
+	- list of useful extensions for each 
+- list of tutorials
+	> likely write my own since this is the one thing i have knowledge about lmao
+	> template information for haxeflixel sprites / sounds / video / effects
+		> haxelibs too prolly?
+- list of engines
+- general haxeflixel information
+
+>> charting
+- online chart editor?
+- chart viewer
+- tool to convert chart types
+- ways to convert charts outside of default fnf formats
+	> osu, sm, etc.
+
+
+
+side notes
+- if this becomes actually helpful, maybe link my cashapp at the bottom
+- the idea is that if i get paid i can work on this full time outside of college / my actual job
+- prolly take a bunch from that funkin-resources github repo thats pretty outdated but has a lot!
