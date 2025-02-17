@@ -1,2 +1,143 @@
-<!-- https://github.com/FiveNightsTD/Stats/blob/main/TowerStats.json -->
- <!-- small website that sorts shit -->
+<head>
+	<title>fnaf tower stats parser</title>
+	<style>
+		body {
+			font-family: Arial, Helvetica, sans-serif;
+		}
+
+		#columns {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			justify-content: space-between;
+		}
+
+		#json-text {
+			font-size: 10px;
+			max-width: 300px;
+			overflow: auto;
+			white-space: pre-wrap;
+			word-wrap: break-word;
+			background-color: #f0f0f0;
+		}
+
+		#left, #center, #right {
+			flex: 1;
+			min-width: 200px;
+		}
+
+		#column-title {
+			text-align: center;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>fnaf tower stats parser</h1>
+	<div id="columns">
+		<div id="left">
+			<h2 id="column-title">raw json</h2>
+			<pre id="json-text">loading...</pre>
+		</div>
+		<div id="center">
+			<h2 id="column-title">sorted</h2>
+			<ul id="character-list"></ul>
+		</div>
+		<div id="right">
+			<h2 id="column-title">options</h2>
+			<div id="sort-by">
+				<h3>sort by:</h3>
+				<button onclick="sortByName()">name</button>
+				<button onclick="sortByRarity()">rarity</button>
+				<button onclick="sortByPrice()">price</button>
+				<!-- <button onclick="sortByRange()">range</button> -->
+				<!-- <button onclick="sortByDamage()">damage</button> -->
+			</div>
+			<div id="sort-order">
+				<h3>sort order:</h3>
+				<button onclick="sortHighToLow()">high to low</button>
+				<button onclick="sortLowToHigh()">low to high</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		var highToLow = true;
+		var previousSort = "name";
+		var jsonData;
+		
+		fetch('https://raw.githubusercontent.com/FiveNightsTD/Stats/main/TowerStats.json')
+			.then(response => response.json())
+			.then(data => {
+				document.getElementById("json-text").innerHTML = JSON.stringify(data, null, 2);
+				jsonData = data;
+				setList(Object.keys(data));
+				return data;
+			});
+		
+		function setList(names) {
+			var list = document.getElementById("character-list");
+			list.innerHTML = "";
+			for (const name of names) {
+				var li = document.createElement("li");
+				li.innerHTML = name;
+				list.appendChild(li);
+			}
+		}
+		function sortHighToLow() {
+			highToLow = true;
+			resort();
+		}
+		function sortLowToHigh() {
+			highToLow = false;
+			resort();
+		}
+		function resort() {
+			switch (previousSort) {
+				case "name":
+					sortByName();
+					break;
+				case "rarity":
+					sortByRarity();
+					break;
+				case "price":
+					sortByPrice();
+					break;
+				case "range":
+					sortByRange();
+					break;
+				case "damage":
+					sortByDamage();
+					break;
+			}
+		}
+
+		function sortByName() {
+			var names = Object.keys(jsonData);
+			
+			names.sort((a, b) => highToLow ? a.localeCompare(b) : b.localeCompare(a));
+
+			setList(names);
+			previousSort = "name";
+		}
+
+		function sortByRarity() {
+			var rarityTypes = ["Uncommon", "Rare", "Epic", "Mythic", "Secret", "Nightmare", "Apex", "Forgotten"];
+			var rarities = Object.entries(jsonData).map(([name, {Rarity}]) => [name, rarityTypes.indexOf(Rarity)]);
+
+			rarities.sort((a, b) => highToLow ? b[1] - a[1] : a[1] - b[1]);
+
+			setList(rarities.map(([name, _]) => '(' + rarityTypes[_] + ') ' + name));
+			previousSort = "rarity";
+		}
+
+		function sortByPrice() {
+			const prices = Object.entries(jsonData).map(([name, {PlacePrice}]) => [name, PlacePrice]);
+
+			prices.sort((a, b) => highToLow ? b[1] - a[1] : a[1] - b[1]);
+
+			setList(prices.map(([name, _]) => '(' + _ + ') ' + name));
+			previousSort = "price";
+		}
+	</script>
+</body>
