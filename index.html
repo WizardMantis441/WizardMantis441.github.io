@@ -1,45 +1,143 @@
-<!-- https://developer.mozilla.org/en-US/docs/Web/HTML -->
-<!-- https://web.stanford.edu/group/csp/cs21/htmlcheatsheet.pdf -->
+<!DOCTYPE html>
+<html lang="en">
 
-<html>
-  <head>
-    <title>Wizard's Hellhole</title>
-    <meta name="description" content="I have 0 idea what i am doing someone please send help, bring cookies too while ur at it. :)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wizard's Incredible Website</title>
+    <meta name="description" content="I have 0 idea what I am doing. Someone please send help, bring cookies too while you're at it. :)">
     <meta name="author" content="WizardMantis441">
-    <link rel="stylesheet" type="text/css" href="style.css">
-  </head>
-  
-  <body>
-    <main>
-      <h1>Wizard's Hellhole</h1>
-      <p>SUP LOSERSSS.</p>
-      <nav>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI Bold', 'Segoe UI', Arial, sans-serif;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .youtube-button {
+            display: flex;
+            align-items: center;
+            background-color: #ff0000c2;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .youtube-button svg {
+            margin: 0 10px;
+            transform: scale(1.5);
+            width: 30px;
+            height: 30px;
+        }
+
+        .youtube-button .right-side {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .youtube-button .right-side h3,
+        .youtube-button .right-side p {
+            margin: 0;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav ul li a {
+            display: block;
+            padding: 10px;
+            color: #ffffff;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        nav ul li a:hover {
+            background-color: #333333;
+        }
+
+        .separator {
+            border-bottom: 1px solid grey;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="position: fixed; left: 0; width: 20%; height: 100%; background-color: #1e1e1e; overflow-y: auto;">
+        <h2>WM441</h2>
+        <div class="separator"></div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#" onclick="alert('Fart Sound! (i dont have one on me but ill get one later)')">Fart Button</a></li>
+                <div class="separator"></div>
+                <li><a href="fnf/converters.html">Funkin Converters</a></li>
+                <li><a href="fnf/funkin.html">FNF in html</a></li>
+                <li><a href="fnf/icon-splitter.html">Icon Splitter</a></li>
+                <li><a href="fnf/learn-by-example.html">Learn By Example</a></li>
+                <li><a href="fnf/p2cne-character.html">Psych Character to CNE Character</a></li>
+                <li><a href="funkin-utils/main.html">Funkin Utils</a></li>
+                <li><a href="ocw/ninji.html">OCW Ninji Leaderboards</a></li>
+                <li><a href="misc/tower-stats-parser.html">FNAF Tower Info Parser</a></li>
+                <li><a href="misc/hash.html">Hash test</a></li>
+                <div class="separator"></div>
+                <li><a href="https://github.com/WizardMantis441">Github</a></li>
+                <li><a href="https://twitter.com/WizardMantis441">Twitter</a></li>
+                <li><a href="https://www.youtube.com/@wm441">Youtube</a></li>
+                <div class="separator"></div>
+                <li><span style="font-size: small;">The Button That Makes You Lose The Game</span></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div style="position: fixed; right: 0; width: 20%; height: 100%; background-color: #1e1e1e; overflow-y: auto;">
+        <h2>Things I want to learn how to do:</h2>
         <ul>
-          <li><a href="fnf/converters.html">Funkin Converters (doesn't work)</a></li>
-          <li><a href="fnf/funkin.html">FNF in html (also doesn't work)</a></li>
-          <li><a href="fnf/icon-splitter.html">Icon Splitter</a></li>
-          <li><a href="fnf/learn-by-example.html">Learn By Example (doesn't work!!)</a></li>
-          <li><a href="fnf/p2cne-character.html">Psych Character to CNE Character</a></li>
-          <li><a href="funkin-utils/main.html">Funkin Utils (WIP)</a></li>
-          <li><a href="ocw/ninji.html">OCW Ninji Leaderboards (archived)</a></li>
-          <li><a href="misc/tower-stats-parser.html">FNAF Tower Info Parser</a></li>
-          <li><a href="misc/hash.html">Hash test</a></li>
+            <li>Updated tracker of social media (Youtube, Twitter, etc.)</li>
+            <li>Documentation on stuff I'm trying to learn (haxe, html, css, javascript)</li>
+            <li>Idk I just wanted to add a third bullet point lmao</li>
+            <li>Ooh maybe like little minigames for when I get bored</li>
+            <li>Is discord bot an option? Idk I just wanna make a discord bot</li>
+            <li>I feel like there should be something on top of the website like a banner or smth but i can't think of anhything to put up there cuz i put everything on the left</li>
         </ul>
-      </nav>
-      
-      <img src="harold.png" alt="LOOK AT THIS HAPPY ASS GUY" width="300" height="300">
-      <p>This is harold. Please say hi to him he is in a very happy mood today.</p>
-      
-      <h1>Things I want to learn how to do:</h1>
-        <ul>
-          <li><p>Updated tracker of social media (Youtube, Twitter, shizz li ke that mhm)</p></li>
-          <li><p>Documentation on shit i'm trying to learn (haxe, html, css, javascript)</p></li>
-          <li><p>idk i just wanted to add a third bullet point lmao</p></li>
-          <li><p>ooh maybe like little minigames for when i get bored</p></li>
-          <li><p>would it be crazy if i was like "man i'm bored" in school and then pulled up vs impostor v4 updater lmao</p></li>
-          <li><p>is discord bot an option? idk i just wanna make a discord bot</p></li>
-          <li><p>fun fact i'm tying this in early school (i was late last friday (it's monday now))</p></li>
-        </ul>
+    </div>
+
+    <main style="margin-left: 20%; margin-right: 20%;">
+        <h1>Wizard's Website (WIP)</h1>
+        <p>SQUAAAAAAD!!!! :)</p>
+
+        <img src="harold.png" alt="LOOK AT THIS HAPPY ASS GUY" width="300" height="300">
+        <p>This is Harold. Please say hi to him; he is in a very happy mood today.</p>
+        <p>This website is mainly to practice web development! Don't mind me heh!</p>
+        <p>This is also like for a resume. Imagine I write "check my website for more information" and they see all this and go "wow what a great coder" and hire me. Boom, 1 Billion Dollars!</p>
+        
+        <div class="youtube-button">
+            <svg viewBox="0 0 40 40" fill="#FF0033">
+                <g>
+                    <path d="M14.4848 20C14.4848 20 23.5695 20 25.8229 19.4C27.0917 19.06 28.0459 18.08 28.3808 16.87C29 14.65 29 9.98 29 9.98C29 9.98 29 5.34 28.3808 3.14C28.0459 1.9 27.0917 0.94 25.8229 0.61C23.5695 0 14.4848 0 14.4848 0C14.4848 0 5.42037 0 3.17711 0.61C1.9286 0.94 0.954148 1.9 0.59888 3.14C0 5.34 0 9.98 0 9.98C0 9.98 0 14.65 0.59888 16.87C0.954148 18.08 1.9286 19.06 3.17711 19.4C5.42037 20 14.4848 20 14.4848 20Z" fill="#FF0033"></path>
+                    <path d="M19 10L11.5 5.75V14.25L19 10Z" fill="white"></path>
+                </g>
+            </svg>
+            <div class="right-side">
+                <h3>WizardMantis441</h3>
+                <p>Subscriber count: <span id="subscriber-count">2,000</span></p>
+            </div>
+        </div>
     </main>
-  </body>
+
+    <script>
+        // fetch("https://www.googleapis.com/youtube/v3/channels?part=statistics&id=UCcX_5kLJ0jYy4F0hKmZ3hUQ&key=AIzaSyD3Yl4H3Xqf0DcVqMmOKqQlqJ0J0X5sW4")
+        //     .then(response => response.json())
+        //     .then(data => document.getElementById("subscriber-count").innerHTML = data.items[0].statistics.subscriberCount);
+    </script>
+</body>
+
 </html>
+
