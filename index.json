@@ -1,0 +1,113 @@
+{
+    "splashes": [
+        "hey guys",
+        "whats up guys",
+        "there are quite a few of these",
+        "it's like minecraft!",
+        "what the hell did you see that",
+        "this isn't my first rodeo",
+        "this is... my first rodeo :(",
+        "this is my second rodeo",
+        "does anyone have any spare socks",
+        "was gonna write something here but i forgot it",
+        "i'm gonna make a website and it's gonna be Great. Let's make something... Great.",
+        "let's make something... Great.",
+        "*hand on your shoulder* hey",
+        "they call me the goat the way i climb steep ahh mountains",
+        "penkaru! (ew this guy sucks) or... DANIEL HUMMUS!!!!",
+        "bop city is my home",
+        "bop city is my people",
+        "bop city... loves me.",
+        "welp, my disappointment is immesurable and my day is ruined.",
+        "see ya suckers, allow me to die weeee!!!",
+        "go pico yeah yeah",
+        "NOTE TO SELF ADD MORE BOP CITY REFERENCES IN HERE"
+    ],
+
+    "github_projects": [
+        {
+            "name": "test",
+            "desc": "test but with a description",
+            "link": "https://github.com/WizardMantis441/"
+        }, {
+            "name": "test2",
+            "desc": "test2 but with a description",
+            "link": "https://github.com/WizardMantis441/"
+        }, {
+            "name": "test3",
+            "desc": "test3 but with a description",
+            "link": "https://github.com/WizardMantis441/"
+        }
+    ],
+
+    "funkin_projects": [
+        {
+            "name": "my first mod",
+            "desc": "this is not my mod",
+            "link": "https://gamebanana.com/mods/441"
+        }, {
+            "name": "my second mod",
+            "desc": "this is also once again.. not my mod",
+            "link": "https://gamebanana.com/mods/442"
+        }, {
+            "name": "my third mod",
+            "desc": "funny thing! the gamebanana ids on this are 441, 442 and 443 heh! this mod is to test really long descriptions",
+            "link": "https://gamebanana.com/mods/443"
+        }
+    ],
+
+    "general_projects": [
+        {
+            "name": "Icon Splitter",
+            "desc": "input an image and it spits out 300x150 cutouts of them!",
+            "link": "fnf/icon-splitter.html"
+        }, {
+            "name": "Funkin Utils",
+            "desc": "just an idea, never got to work on it",
+            "link": "funkin-utils/main.html"
+        }, {
+            "name": "PE to CNE Converter",
+            "desc": "converts psych engine characters to codename engine's xml format",
+            "link": "fnf/p2cne-character.html"
+        }, {
+            "name": "OCW Ninji Leaderboards",
+            "desc": "leaderboards for ninji speedruns, outdated!",
+            "link": "ocw/ninji.html"
+        }, {
+            "name": "FNAF Tower Info Parser",
+            "desc": "a little script to organize tower info",
+            "link": "misc/tower-stats-parser.html"
+        }, {
+            "name": "Hash test",
+            "desc": "twitch dot tv slash hashisdead is my comfort minecraft streamer",
+            "link": "misc/hash.html"
+        }
+    ],
+
+    "misc_ideas": [
+        "Updated tracker of social media (Youtube, Twitter, etc.)",
+        "Documentation on stuff I'm trying to learn (haxe, html, css, javascript)",
+        "Idk I just wanted to add a third point lmao",
+        "Ooh maybe like little minigames for when I get bored",
+        "Is discord bot an option? Idk I just wanna make a discord bot",
+        "i wanna finish this website so frickin bad"
+    ],
+
+    "socials": [
+        {
+            "name": "github",
+            "icon": "https://avatars.githubusercontent.com/u/9919?v=4",
+            "link": "https://github.com/WizardMantis441"
+        }, {
+            "name": "twitter",
+            "icon": "https://avatars.githubusercontent.com/u/50278?v=4",
+            "link": "https://twitter.com/WizardMantis441"
+        }, {
+            "name": "youtube",
+            "icon": "https://avatars.githubusercontent.com/u/4052902?v=4",
+            "link": "https://www.youtube.com/@wm441"
+        }
+    ],
+
+    "written_by": "hand :)"
+}
