@@ -65,20 +65,20 @@
 	<section class="section-footer">
 		<div id="sFooter-title">My Socials!</div>
 		<div id="sFooter-content">
-			<div id="sFooter-item">
+			<!-- <div id="sFooter-item">
 				<img id="sFooter-icon" src="https://avatars.githubusercontent.com/u/9919?v=4">
 				<a href="https://example.com">Github</a>
-			</div>
-			<div id="sFooter-separator"></div>
-			<div id="sFooter-item">
+			</div> -->
+			<!-- <div id="sFooter-separator"></div> -->
+			<!-- <div id="sFooter-item">
 				<img id="sFooter-icon" src="https://avatars.githubusercontent.com/u/9919?v=4">
 				<a href="https://example.com">I didn't do</a>
-			</div>
-			<div id="sFooter-separator"></div>
-			<div id="sFooter-item">
+			</div> -->
+			<!-- <div id="sFooter-separator"></div> -->
+			<!-- <div id="sFooter-item">
 				<img id="sFooter-icon" src="https://avatars.githubusercontent.com/u/9919?v=4">
 				<a href="https://example.com">the others yet</a>
-			</div>
+			</div> -->
 		</div>
 		<div id="sFooter-bottom">Last Updated: 3/7/2025</div>
 	</section>
@@ -199,7 +199,8 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		padding: 5px;
+		padding: 15px;
+		justify-content: space-evenly;
 	}
 	#sFooter-item {
 		background-color: rgba(255, 255, 255, 0.05);
@@ -210,9 +211,10 @@
 		align-items: center;
 	}
 	#sFooter-separator {
-		width: 2px;
-		height: 100px;
-		background-color: rgba(255, 255, 255, 0.1);
+		width: 5px;
+		height: 100%;
+		padding: 20px;
+		color: rgb(255, 255, 255);
 	}
 	#sFooter-icon {
 		width: 50px;
@@ -225,8 +227,10 @@
 		color:rgb(102, 102, 102);
 	}
 
-	#project-box-container {
+	#project-box-container, #sGithub-project-container, #sFNF-project-container, #sMiscProjects-project-container {
+		background-color: #0000002c;
 		display: flex;
+		max-width: 100%;
 		overflow-x: auto;
 	}
 	.project-box {
@@ -265,50 +269,52 @@
 		<a href="${link}"><div class="project-box-link">${name}</div></a>
 		<div class="project-box-separator"></div>
 		<div class="project-box-description">${desc}</div>`;
-		document.getElementById(location).appendChild(projectBox);
+
+		let projectContainer = document.getElementById(location);
+		projectContainer.appendChild(projectBox);
 	}
 
 	function loadFooterItem(icon, title, link) {
 		let footerItem = document.createElement("div");
 		footerItem.classList.add("sFooter-item");
 		footerItem.innerHTML = `
-		<div class="sFooter-icon"><img src="${icon}"></div>
-		<div class="sFooter-title">${title}</div>`;
-		document.getElementById("sFooter-content").appendChild(footerItem);
+		<div class="sFooter-icon"><img src="${icon} width="50" height="50"></div>
+		<div class="sFooter-title"><a href="${link}">${title}</a></div>`;
+
+		let footerContainer = document.getElementById("sFooter-content");
+		footerContainer.appendChild(footerItem);
+	}
+
+	function loadFooterSeparator() {
+		let footerSeparator = document.createElement("div");
+		footerSeparator.classList.add("sFooter-separator");
+
+		let footerContainer = document.getElementById("sFooter-content");
+		footerContainer.appendChild(footerSeparator);
 	}
 
 	fetch("index.json")
 		.then(response => response.json())
 		.then(data => {
-			// splash text
 			document.getElementById("sTop-splash").innerHTML = data.splashes[Math.floor(Math.random() * data.splashes.length)];
 
-			// github projects
-			for (let i = 0; i < data.github_projects.length; i++) {
-				let info = data.github_projects[i];
-				loadProjectBox(info.name, info.desc, info.link, "sGithub-project-container");
-			}
-
-			// funkin projects
-			for (let i = 0; i < data.funkin_projects.length; i++) {
-				let info = data.funkin_projects[i];
-				loadProjectBox(info.name, info.desc, info.link, "sFNF-project-container");
-			}
-
-			// misc projects
-			for (let i = 0; i < data.general_projects.length; i++) {
-				let info = data.general_projects[i];
-				loadProjectBox(info.name, info.desc, info.link, "sMiscProjects-project-container");
-			}
+			data.github_projects.forEach(project => loadProjectBox(project.name, project.desc, project.link, "sGithub-project-container"));
+			data.funkin_projects.forEach(project => loadProjectBox(project.name, project.desc, project.link, "sFNF-project-container"));
+			data.miscellaneous_projects.forEach(project => loadProjectBox(project.name, project.desc, project.link, "sMiscProjects-project-container"));
 
 			// TODO: misc ideas
 
 			// TODO: fix footer socials
-			// for (let i = 0; i < data.socials.length; i++) {
-			// 	let info = data.socials[i];
-			// 	loadFooterItem(info.icon, info.name, info.link);
-			// }
+			for (let i = 0; i < data.socials.length; i++) {
+				let info = data.socials[i];
+				loadFooterItem(info.icon, info.name, info.link);
+
+				// if (i > 0 && i < data.socials.length - 1) {
+					loadFooterSeparator();
+				// }
+			}
 		});
 
 </script>
 </html>
+

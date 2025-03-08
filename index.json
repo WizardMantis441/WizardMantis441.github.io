@@ -53,10 +53,26 @@
             "name": "my third mod",
             "desc": "funny thing! the gamebanana ids on this are 441, 442 and 443 heh! this mod is to test really long descriptions",
             "link": "https://gamebanana.com/mods/443"
+        }, {
+            "name": "my second mod",
+            "desc": "this is also once again.. not my mod",
+            "link": "https://gamebanana.com/mods/442"
+        }, {
+            "name": "my third mod",
+            "desc": "funny thing! the gamebanana ids on this are 441, 442 and 443 heh! this mod is to test really long descriptions",
+            "link": "https://gamebanana.com/mods/443"
+        }, {
+            "name": "my second mod",
+            "desc": "this is also once again.. not my mod",
+            "link": "https://gamebanana.com/mods/442"
+        }, {
+            "name": "my third mod",
+            "desc": "funny thing! the gamebanana ids on this are 441, 442 and 443 heh! this mod is to test really long descriptions",
+            "link": "https://gamebanana.com/mods/443"
         }
     ],
 
-    "general_projects": [
+    "miscellaneous_projects": [
         {
             "name": "Icon Splitter",
             "desc": "input an image and it spits out 300x150 cutouts of them!",
@@ -84,7 +100,7 @@
         }
     ],
 
-    "misc_ideas": [
+    "ideas": [
         "Updated tracker of social media (Youtube, Twitter, etc.)",
         "Documentation on stuff I'm trying to learn (haxe, html, css, javascript)",
         "Idk I just wanted to add a third point lmao",
