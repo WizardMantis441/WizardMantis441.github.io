@@ -20,9 +20,9 @@
 			<br>Let's make something... Great.
 			<br><br>yeah thats about it
 		</div>
-		<div id="sIntro-rightImage">
+		<div id="sIntro-rightImageContainer">
 			<!-- temporary harold, will be scrolling fan art! -->
-			<img src="harold.png" alt="frickin my bro" width="200" height="169">
+			<img id="sIntro-rightImage" src="harold.png" alt="frickin my bro">
 		</div>
 	</section>
 
@@ -87,24 +87,22 @@
 	.separator {
 		width: 100%;
 		margin: auto;
-		padding: 10px;
+		padding: 15px;
 	}
 
 	.section-top {
-		font-size: 25px;
 		background: linear-gradient(180deg, #000000, #333333);
 	}
 	#sTop-name {
-		font-size: 50px;
+		font-size: 600%;
 		font-weight: bold;
 		padding: 5px;
 	}
 	#sTop-details {
-		font-size: 20px;
+		font-size: 200%;
 		padding: 2px;
 	}
 	#sTop-splash {
-		font-size: 10px;
 		padding: 5px;
 		color: gray;
 	}
@@ -112,18 +110,18 @@
 	.section-intro {
 		display: flex;
 		justify-content: center;
+		align-items: center;
 		background: linear-gradient(135deg, #b600fd, #1e0097a7);
-		/* align-content: center; */
 	}
 	#sIntro-leftText {
 		align-content: center;
-		font-size: 18px;
-		margin: 10px;
+		font-size: 200%;
+		margin: 2%;
 	}
 	#sIntro-rightImage {
 		margin: 10px;
-		width: 200px;
-		height: 169px;
+		width: 500px;
+		height: 200px;
 		box-shadow: 0 0 22px rgba(0, 0, 0, 1);
 	}
 
@@ -133,12 +131,11 @@
 		justify-content: center;
 		align-items: center;
 		padding: 10px;
-		font-weight: bold;
 	}
 	#sGithub-pfp {
-		margin: 5px;
-		width: 50px;
-		height: 50px;
+		margin: 15px;
+		width: 100px;
+		height: 100px;
 		border-radius: 50%;
 		box-shadow: 0 0 22px rgba(0, 0, 0, 1);
 	}
@@ -147,6 +144,8 @@
 		font-size: 25px;
 		text-decoration: none;
 		color: white;
+		font-weight: bold;
+		font-size: 250%;
 	}
 
 	#sFNF-top {
@@ -185,7 +184,7 @@
 		justify-content: center;
 		align-items: center;
 		padding: 10px;
-		justify-content: space-evenly;
+		/* justify-content: space-evenly; */
 	}
 	#sFooter-bottom {
 		font-size: 12px;
@@ -200,6 +199,8 @@
 		flex-direction: column;
 		border-radius: 10%;
 		font-weight: bold;
+		margin-left: 50px;
+		margin-right: 50px;
 	}
 	#sFooter-icon {
 		width: 50px;
@@ -226,8 +227,8 @@
 	}
 	.project-box {
 		background-color: #00000098;
-		width: 200px;
-		height: 200px;
+		width: 400px;
+		height: 400px;
 		margin: 8px;
 		padding: 10px;
 		border-radius: 10px;
@@ -240,6 +241,7 @@
 	}
 	.project-box-name {
 		font-weight: bold;
+		font-size: 50px;
 	}
 	.project-box-separator {
 		width: 100%;
@@ -247,7 +249,7 @@
 		background-color: rgba(255, 255, 255, 0.5);
 	}
 	.project-box-description {
-		font-size: 15px;
+		font-size: 25px;
 		color: gray;
 		align-items: center;
 	}
@@ -257,7 +259,7 @@
 		let projectBox = document.createElement("div");
 		projectBox.classList.add("project-box");
 		projectBox.innerHTML = `
-		<a href="${link}"><div class="project-box-link">${name}</div></a>
+		<a href="${link}"><div class="project-box-name">${name}</div></a>
 		<div class="project-box-separator"></div>
 		<div class="project-box-description">${desc}</div>`;
 
