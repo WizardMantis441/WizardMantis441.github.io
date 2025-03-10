@@ -6,11 +6,11 @@
 	<title>WIZARD'S [okay] WEBSITE!!!</title>
 </head>
 <body>
-	<section class="section-top">
+	<div class="section-top">
 		<div id="sTop-name">WizardMantis441</div>
 		<div id="sTop-details">(he / him) - <span id="sTop-age">19</span> Years Old</div>
 		<div id="sTop-splash">random splash text but grayed out and small</div>
-	</section>
+	</div>
 
 	<div class="separator"></div>
 	<section class="section-intro">
@@ -38,7 +38,7 @@
 	<div class="separator"></div>
 	<section class="section-fnf">
 		<div id="sFNF-top">
-			<div id="sFNF-title">Friday Night Funkin Mods</div>
+			<div id="sFNF-title">Friday Night Funkin' Mods</div>
 		</div>
 		<div id="sFNF-project-container"></div>
 	</section>
@@ -62,26 +62,12 @@
 		i'll come back to this... LATER!!!
 	</section> -->
 
-	<section class="section-footer">
+	<div class="separator"></div>
+	<div class="section-footer">
 		<div id="sFooter-title">My Socials!</div>
-		<div id="sFooter-content">
-			<!-- <div id="sFooter-item">
-				<img id="sFooter-icon" src="https://avatars.githubusercontent.com/u/9919?v=4">
-				<a href="https://example.com">Github</a>
-			</div> -->
-			<!-- <div id="sFooter-separator"></div> -->
-			<!-- <div id="sFooter-item">
-				<img id="sFooter-icon" src="https://avatars.githubusercontent.com/u/9919?v=4">
-				<a href="https://example.com">I didn't do</a>
-			</div> -->
-			<!-- <div id="sFooter-separator"></div> -->
-			<!-- <div id="sFooter-item">
-				<img id="sFooter-icon" src="https://avatars.githubusercontent.com/u/9919?v=4">
-				<a href="https://example.com">the others yet</a>
-			</div> -->
-		</div>
-		<div id="sFooter-bottom">Last Updated: 3/7/2025</div>
-	</section>
+		<div id="sFooter-content"></div>
+		<div id="sFooter-bottom"></div>
+	</div>
 </body>
 <style>
 	body {
@@ -95,15 +81,13 @@
 	}
 
 	section {		
-		/* background-color: rgba(255, 255, 255, 0.05); here for debugging margins lol */
 		margin: 5px;
 	}
 
 	.separator {
-		/* background-color: rgba(0, 0, 0, 0.1); */
-		width: 98%;
+		width: 100%;
 		margin: auto;
-		height: 2px;
+		padding: 10px;
 	}
 
 	.section-top {
@@ -148,7 +132,8 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		padding: 10px
+		padding: 10px;
+		font-weight: bold;
 	}
 	#sGithub-pfp {
 		margin: 5px;
@@ -199,32 +184,38 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		padding: 15px;
+		padding: 10px;
 		justify-content: space-evenly;
 	}
-	#sFooter-item {
-		background-color: rgba(255, 255, 255, 0.05);
-		margin: 10px;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
+	#sFooter-bottom {
+		font-size: 12px;
+		color:rgb(102, 102, 102);
 	}
-	#sFooter-separator {
-		width: 5px;
-		height: 100%;
-		padding: 20px;
-		color: rgb(255, 255, 255);
+
+	.sFooter-item {
+		background-color: rgba(0, 0, 0, 0.2);
+		padding: 10px;
+		display: flex;
+		align-items: center;
+		flex-direction: column;
+		border-radius: 10%;
+		font-weight: bold;
 	}
 	#sFooter-icon {
 		width: 50px;
 		height: 50px;
 		border-radius: 50%;
-		box-shadow: 0 0 22px rgba(0, 0, 0, 1);
+		outline-style: solid;
+		outline-color: black;
+		outline-width: 3px;
+		box-shadow: 0 0 32px rgba(0, 0, 0, 0.6);
 	}
-	#sFooter-bottom {
-		font-size: 12px;
-		color:rgb(102, 102, 102);
+	#sFooter-link {
+		padding-top: 8px;
+		text-decoration: none;
+	}
+	#sFooter-link:hover {
+		color: rgba(255, 255, 255, 0.69);
 	}
 
 	#project-box-container, #sGithub-project-container, #sFNF-project-container, #sMiscProjects-project-container {
@@ -245,9 +236,9 @@
 		flex: none;
 		flex-direction: column;
 		justify-content: space-evenly;
+		font-size: 32px;
 	}
 	.project-box-name {
-		font-size: 20px;
 		font-weight: bold;
 	}
 	.project-box-separator {
@@ -278,21 +269,14 @@
 		let footerItem = document.createElement("div");
 		footerItem.classList.add("sFooter-item");
 		footerItem.innerHTML = `
-		<div class="sFooter-icon"><img src="${icon} width="50" height="50"></div>
-		<div class="sFooter-title"><a href="${link}">${title}</a></div>`;
+		<img id="sFooter-icon" src="${icon} width="50" height="50">
+		<a id="sFooter-link" href="${link}">${title}</a>`;
 
 		let footerContainer = document.getElementById("sFooter-content");
 		footerContainer.appendChild(footerItem);
 	}
 
-	function loadFooterSeparator() {
-		let footerSeparator = document.createElement("div");
-		footerSeparator.classList.add("sFooter-separator");
-
-		let footerContainer = document.getElementById("sFooter-content");
-		footerContainer.appendChild(footerSeparator);
-	}
-
+	// load projects from json like a freaking goat this is so sick man im so proud
 	fetch("index.json")
 		.then(response => response.json())
 		.then(data => {
@@ -301,20 +285,24 @@
 			data.github_projects.forEach(project => loadProjectBox(project.name, project.desc, project.link, "sGithub-project-container"));
 			data.funkin_projects.forEach(project => loadProjectBox(project.name, project.desc, project.link, "sFNF-project-container"));
 			data.miscellaneous_projects.forEach(project => loadProjectBox(project.name, project.desc, project.link, "sMiscProjects-project-container"));
-
-			// TODO: misc ideas
-
-			// TODO: fix footer socials
-			for (let i = 0; i < data.socials.length; i++) {
-				let info = data.socials[i];
-				loadFooterItem(info.icon, info.name, info.link);
-
-				// if (i > 0 && i < data.socials.length - 1) {
-					loadFooterSeparator();
-				// }
-			}
+			// TODO: figure out misc ideas
+			data.socials.forEach(social => loadFooterItem(social.icon, social.name, social.link));
 		});
 
+	// automatic last updated!
+	fetch(`https://api.github.com/repos/WizardMantis441/WizardMantis441.github.io/commits`)
+		.then(response => response.json())
+		.then(data => {
+			const latestCommit = data[0];
+			const lastUpdated = new Date(latestCommit.commit.author.date);
+			document.getElementById('sFooter-bottom').innerHTML = `Last updated: ${lastUpdated.toLocaleString()}`;
+		});
+	
+	// update age
+	setInterval(() => {
+		const ageSpan = document.getElementById("sTop-age");
+		const age = (Date.now() - new Date('2006-01-28T00:00:00.000Z').getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+		ageSpan.textContent = Math.trunc(age * 100000000) / 100000000;
+	}, 0);
 </script>
 </html>
-
