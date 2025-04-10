@@ -122,6 +122,10 @@
 
     "funkin_projects": [
         {
+            "name": "VS Tabi",
+            "desc": "I coded about 80% of the mod, this was super fun man",
+            "link": "https://gamebanana.com/mods/286388"
+        }, {
             "name": "VS Raven",
             "desc": "I made the UI! that's about it tho i didn't do much else",
             "link": "https://gamebanana.com/mods/546856"
