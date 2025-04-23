@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Offset Helper</title>
+</head>
+<body>
+	<div id="container">
+		<div id="center">
+			<canvas id="previewCanvas"></canvas>
+		</div>
+	</div>
+	
+	<div id="hud-container">
+		<div id="left-bar">
+			<div class="panel unfolded" id="controls">
+				<h2>Controls</h2>
+				<label class="custom-file-input">Choose Sprite Sheet<input type="file" id="spriteSheetInput" accept=".png" hidden></label><br><br>
+				<label class="custom-file-input">Choose XML File<input type="file" id="xmlInput" accept=".xml" hidden></label><br><br>
+				<label><input type="checkbox" id="flipX"> Flip X</label><br>
+				<label><input type="checkbox" id="fromCenter"> Adjust from center</label><br>
+				<label><input type="checkbox" id="showRef"> Show reference frame</label>
+				<div id="refSelectors" class="hidden">
+					<select id="animSelect"></select> <!-- the idea is that if you want an onion skin you pick which anim and which frame it actually shows-->
+					<select id="frameSelect"></select>
+				</div><br>
+				<button id="copyOffsets">Copy Offsets</button>
+			</div>
+	
+			<div class="panel unfolded" id="offsetList">
+				<h2>Offsets</h2>
+				<table>
+					<tr>
+						<th>Name</th>
+						<th>Prefix</th>
+						<th>X</th>
+						<th>Y</th>
+					</tr>
+					<tr>
+						<td>idle</td>
+						<td>idle instance 1</td>
+						<td>0</td>
+						<td>0</td>
+					</tr>
+					<tr>
+						<td>singLEFT</td>
+						<td>my butt!</td>
+						<td>12</td>
+						<td>-4</td>
+					</tr>
+					<tr>
+						<td>singDOWN</td>
+						<td>yeah</td>
+						<td>4721</td>
+						<td>6</td>
+					</tr>
+				  </table>
+			</div>
+		</div>
+
+		<div id="right-bar">
+			<div class="panel unfolded fold-right" id="extraPanel">
+				<h2>Extra Panel</h2>
+				<p> Extra panel in case i need an extra panel or something i don't know</p>
+			</div>
+	
+			<div class="panel unfolded fold-right" id="nudger">
+				<h2>Nudge</h2>
+				<div class="nudge-controls">
+					<button data-dir="left">left</button>
+					<button data-dir="down">down</button>
+					<button data-dir="up">up</button>
+					<button data-dir="right">right</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<button id="hud-toggle">Toggle HUD</button>
+</body>
+
+<style>
+    :root { /* YOU CAN DO VARIABLESS IM SAVEDDDDD*/
+        --background-color: #222;
+        --hover-color: #333;
+        --text-color: white;
+        --border-radius: 4px;
+        --padding: 8px 12px;
+        --transition-time: 0.15s;
+        --transition-ease: ease-in-out;
+        --panel-background: #333;
+        --panel-header-background: #222;
+    }
+
+    html, body {
+        margin: 10px;
+        padding: 10px;
+        height: 100%;
+        background: #16161d;
+        color: var(--text-color);
+        font-family: sans-serif;
+        overflow: hidden; /* disable scrolling */
+    }
+
+    button {
+        background: var(--background-color);
+        color: var(--text-color);
+        border: none;
+        border-radius: var(--border-radius);
+        padding: var(--padding);
+        font-family: inherit;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background var(--transition-time) var(--transition-ease);
+    }
+
+    button:hover {
+        background: var(--hover-color);
+    }
+
+	/* so it turns out you can't "style" inputs, so you have to actually hide it and make a custom file input :( */
+	input[type="file"], input[type="checkbox"], select {
+        background: var(--background-color);
+        color: var(--text-color);
+        border: none;
+        border-radius: var(--border-radius);
+        padding: var(--padding);
+        font-family: inherit;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background var(--transition-time) var(--transition-ease);
+    }
+
+    input[type="file"]:hover, input[type="checkbox"]:hover, select:hover {
+        background: var(--hover-color);
+    }
+
+    input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+    }
+
+	/* fuckkkk i hate itt */
+	.custom-file-input {
+		display: inline-block;
+		background: var(--background-color);
+		border: none;
+		border-radius: var(--border-radius); /* yeah its just so slick its so cool oh yeaa baby*/
+		padding: var(--padding);
+		cursor: pointer;
+		transition: background var(--transition-time) var(--transition-ease); /* Smooth hover effect */
+	}
+
+	.custom-file-input:hover {
+		background: var(--hover-color);
+	}
+
+	/* gtfO!!! */
+	input[type="file"][hidden] { display: none; }
+
+    #container {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        z-index: 0;
+        box-sizing: border-box;
+    }
+
+    #previewCanvas {
+        width: 100%;
+        height: 100%;
+        background: conic-gradient(
+            #e8e8e8 90deg,
+            #cfcfcf 90deg 180deg,
+            #e8e8e8 180deg 270deg,
+            #cfcfcf 270deg
+        );
+        background-repeat: repeat;
+        background-size: 50px 50px;
+        background-position: top left;
+        border: 5px solid #444;
+        box-sizing: border-box;
+    }
+
+    #hud-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #left-bar, #right-bar {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        pointer-events: auto;
+    }
+
+    #left-bar {
+        margin-left: 10px;
+    }
+
+    #right-bar {
+        margin-right: 10px;
+    }
+
+    .panel {
+        background: var(--panel-background);
+        border-radius: var(--border-radius);
+        overflow: auto;
+        padding: 16px;
+        transition: transform var(--transition-time) var(--transition-ease);
+        width: 300px;
+        height: 300px;
+        position: relative;
+        pointer-events: auto;
+    }
+
+    .panel h2 {
+        margin-top: 0; /* oops*/
+        background: var(--panel-header-background);
+        padding: 4px;
+        border-radius: var(--border-radius);
+        text-align: center;
+    }
+
+    #hud-toggle {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        z-index: 2;
+    }
+
+    .folded { transform: translateX(-120%); }
+    .fold-right.folded { transform: translateX(120%); }
+    .unfolded { transform: translateX(0); }
+</style>
+
+<script type="module">
+	document.getElementById('hud-toggle').addEventListener('click', () => {
+		document.querySelectorAll('.panel').forEach(panel => {
+			panel.classList.toggle('folded');
+			panel.classList.toggle('unfolded');
+		});
+	});
+</script>
