@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chart converters</title>
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+	<main>
+		<div id="top">
+			chart convberter - wip menu lolz
+		</div>
+		<div id="content">
+			<section>
+				<div id="title">From</div>
+				<div id="options">
+					<div id="option">VSlice</div>
+					<div id="option">Legacy</div>
+					<div id="option">Codename</div>
+					<div id="option">Psych</div>
+					<div id="option">Kade?</div>
+					<div id="option">FPS+?</div>
+				</div>
+			</section>
+			<section>
+				<div id="title">To</div>
+				<div id="options">
+					<div id="option">VSlice</div>
+					<div id="option">Legacy</div>
+					<div id="option">Codename</div>
+					<div id="option">Psych</div>
+					<div id="option">Kade?</div>
+					<div id="option">FPS+?</div>
+				</div>
+			</section>
+		</div>
+		<div id="bottom">
+			<div>
+				<input type="checkbox" id="folderToggle" name="folderToggle" value="false">
+				<label for="folderToggle">Convert Entire Folders</label>
+			</div>
+			<button>The Button That Converts It</button>
+		</div>
+
+	</main>
+</body>
+<style>
+	body {
+		background-color: #16161D;
+		margin: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 100vh;
+		font-family: 'JetBrains Mono', monospace;
+		color: aliceblue;
+	}
+
+	main {
+		background-color: rgb(231, 244, 255);
+		width: 80vw;
+		height: 90vh;
+		max-width: 700px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
+		border-radius: 10px;
+		box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.3);
+		
+	}
+
+	button {
+		color: black;
+		font-family: 'JetBrains Mono', monospace;
+	}
+
+	main > #top, main > #bottom {
+		border-radius: 9px 9px 0 0;
+		background-color: rgb(24, 24, 24);
+		height: 40px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding-left: 20px;
+		padding-right: 20px;
+		font-weight: bolder;
+		width: calc(100% - 40px); /* dude i'm a fucking genius */
+	}
+	main > #bottom {
+		justify-content: space-between;
+		border-radius: 0 0 9px 9px;
+	}
+
+	#content {
+		display: flex;
+		flex: 1;
+		width: 100%;
+	}
+
+	section {
+		flex: 1;
+		padding: 15px;
+		background-color: rgb(41, 41, 41);
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+
+	#title {
+		font-weight: bolder;
+		padding-bottom: 5px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	#option {
+		background-color: rgb(182, 182, 182);
+		margin: 5px;
+		padding: 5px;
+		border-radius: 4px;
+		cursor: pointer;
+		display: flex;
+		justify-content: center;
+		color: rgb(0, 0, 0);
+	}
+	#option:hover {
+		background-color: #d8d8d8;
+	}
+</style>
+<script>
+	function convert(from, to) {
+		alert(`okay now pretend that it converted from ${selectedFrom} to ${selectedTo}`);
+	}
+
+	let selectedFrom = null;
+	let selectedTo = null;
+
+	const fromOptions = document.querySelectorAll('section:nth-of-type(1) #option');
+	const toOptions = document.querySelectorAll('section:nth-of-type(2) #option');
+	function handleSelection(options, callback) {
+		options.forEach(option => {
+			option.addEventListener('click', () => {
+				options.forEach(opt => {
+					opt.textContent = opt.textContent.replace('> ', '').replace(' <', '');
+				});
+				option.textContent = `> ${option.textContent} <`;
+				callback(option.textContent.replace('> ', '').replace(' <', ''));
+			});
+		});
+	}
+	handleSelection(fromOptions, (value) => selectedFrom = value); // this is probably a weird way to do it
+	handleSelection(toOptions, (value) => selectedTo = value);
+
+	const convertButton = document.querySelector('#bottom button');
+	convertButton.addEventListener('click', () => {
+		if (!selectedFrom && !selectedTo) {
+			alert('bro selected nothing :skull:');
+		} else if (!selectedFrom) {
+			alert('select a "From" thing');
+		} else if (!selectedTo) {
+			alert('select a "To" thing');
+		} else if (selectedFrom === selectedTo) {
+			alert('those are the same thing dude');
+		} else {
+			convert(selectedFrom, selectedTo);
+		}
+	});
+</script>
+</html>
