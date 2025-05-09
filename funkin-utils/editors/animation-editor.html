@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Animation Editor</title>
+</head>
+<body>
+	<canvas id="canvas"></canvas>
+	<div id="hud">
+		<label>Sprite PNG: <input type="file" id="imageInput" accept=".png"></label>
+		<label>Sprite XML: <input type="file" id="atlasInput" accept=".xml"></label>
+		<label id="animLabel" style="display: none;">Animation: <select id="animSelect"></select></label>
+	</div>
+</body>
+<style>
+	body {
+		margin: 0;
+		padding: 0;
+		width: 100vw;
+		height: 100vh;
+		background: conic-gradient(#e8e8e8 90deg, #dadada 90deg 180deg, #e8e8e8 180deg 270deg, #dadada 270deg);
+		background-size: 50px 50px;
+		background-position: center;
+		overflow: hidden;
+	}
+	canvas {
+		display: block;
+		position: absolute;
+		top: 0; left: 0;
+	}
+	#hud {
+		position: absolute;
+		top: 10px; left: 10px;
+		background: rgba(255,255,255,0.8);
+		padding: 8px;
+		border-radius: 4px;
+		font-family: sans-serif;
+	}
+	#hud > * {
+		display: block;
+		margin-bottom: 6px;
+	}
+</style>
+
+<script>
+	const canvas = document.getElementById('canvas');
+	const ctx = canvas.getContext('2d');
+
+	function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+	window.addEventListener('resize', resize);
+	resize(); // ratio stuff blehhhh bleh
+
+	const camera = { x: 0, y: 0, zoom: 1 };
+	let isDragging = false, lastMouse = { x: 0, y: 0 };
+
+	canvas.addEventListener('wheel', e => {
+		e.preventDefault();
+		camera.zoom = Math.min(10, Math.max(0.1, camera.zoom - e.deltaY * 0.0005));
+	});
+
+	canvas.addEventListener('mousedown', e => {
+		isDragging = true;
+		lastMouse = { x: e.clientX, y: e.clientY };
+	});
+
+	canvas.addEventListener('mouseup', () => isDragging = false);
+	canvas.addEventListener('mouseleave', () => isDragging = false);
+
+	canvas.addEventListener('mousemove', e => {
+		if (isDragging) {
+			camera.x -= (e.clientX - lastMouse.x) / camera.zoom;
+			camera.y -= (e.clientY - lastMouse.y) / camera.zoom;
+			lastMouse = { x: e.clientX, y: e.clientY };
+		}
+	});
+
+	const sprite = { x: 300, y: 300 };
+	let animations = {};
+	let currentAnim = null;
+	let frameIndex = 0;
+	const FRAME_RATE = 24;
+	const FRAME_DURATION = 1000 / FRAME_RATE;
+	let accTime = 0;
+	let lastTime = performance.now();
+	const spriteSheet = new Image();
+
+	const imageInput = document.getElementById('imageInput');
+	const atlasInput = document.getElementById('atlasInput');
+	const animLabel  = document.getElementById('animLabel');
+	const animSelect = document.getElementById('animSelect');
+
+	atlasInput.addEventListener('change', () => {
+		loadAtlas();
+		if (spriteSheet.complete && Object.keys(animations).length)
+			centerCamera();
+	});
+
+	imageInput.addEventListener('change', () => {
+		loadImage();
+		spriteSheet.onload = () => {
+			URL.revokeObjectURL(spriteSheet.src);
+			if (Object.keys(animations).length)
+				centerCamera();
+		};
+	});
+
+	animSelect.addEventListener('change', () => {
+		currentAnim = animSelect.value;
+		frameIndex = 0;
+		accTime = 0;
+	});
+
+	function loadImage() {
+		const file = imageInput.files[0];
+		if (file)
+			spriteSheet.src = URL.createObjectURL(file);
+	}
+
+	function loadAtlas() {
+		const file = atlasInput.files[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = e => {
+				parseAtlas(e.target.result);
+				showAnimsList();
+				if (spriteSheet.complete)
+					centerCamera();
+			};
+			reader.readAsText(file);
+		}
+	}
+
+	function parseAtlas(xmlString) {
+		animations = {};
+		const parser = new DOMParser();
+		const doc = parser.parseFromString(xmlString, "application/xml");
+		const subs = doc.getElementsByTagName('SubTexture');
+		for (let el of subs) {
+			const name = el.getAttribute('name');
+			const key = name.replace(/\d{4}$/, ''); // what the Fuck
+			if (!animations[key]) animations[key] = [];
+			animations[key].push({
+				x:      + el.getAttribute('x'),
+				y:      + el.getAttribute('y'),
+				width:  + el.getAttribute('width'),
+				height: + el.getAttribute('height'),
+				frameX: + el.getAttribute('frameX') || 0,
+				frameY: + el.getAttribute('frameY') || 0,
+				frameW: + el.getAttribute('frameWidth')  || + el.getAttribute('width'),
+				frameH: + el.getAttribute('frameHeight') || + el.getAttribute('height'),
+			});
+		}
+	}
+
+	function showAnimsList() {
+		animSelect.innerHTML = '';
+		Object.keys(animations).forEach(key => {
+			const opt = document.createElement('option');
+			opt.value = key;
+			opt.textContent = key;
+			animSelect.append(opt);
+		});
+
+		if (Object.keys(animations).length) {
+			animLabel.style.display = 'block';
+			currentAnim = animSelect.value = Object.keys(animations)[0];
+			frameIndex = 0;
+			accTime = 0;
+		}
+	}
+
+	function centerCamera() {
+		camera.x = sprite.x - (canvas.width / (2 * camera.zoom));
+		camera.y = sprite.y - (canvas.height / (2 * camera.zoom));
+	}
+
+	function drawLoop() {
+		const now = performance.now();
+		const delta = now - lastTime;
+		lastTime = now;
+
+		// frame stuff
+		if (currentAnim) {
+			accTime += delta;
+			const frames = animations[currentAnim];
+			if (accTime >= FRAME_DURATION) {
+				const step = Math.floor(accTime / FRAME_DURATION);
+				frameIndex = (frameIndex + step) % frames.length;
+				accTime %= FRAME_DURATION;
+			}
+		}
+
+		// ts ass dude why i gotta do all this :sob:
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ctx.save();
+		ctx.scale(camera.zoom, camera.zoom);
+		ctx.translate(-camera.x, -camera.y);
+
+		// draw cur frame
+		if (currentAnim && spriteSheet.complete) {
+			const frame = animations[currentAnim][frameIndex];
+			const dw = frame.frameW, dh = frame.frameH;
+			const dx = sprite.x - dw / 2 + frame.frameX;
+			const dy = sprite.y - dh / 2 + frame.frameY;
+			ctx.drawImage(
+				spriteSheet,
+				frame.x, frame.y, frame.width, frame.height,
+				dx, dy,
+				dw, dh
+			);
+		}
+
+		ctx.restore();
+		requestAnimationFrame(drawLoop);
+	}
+
+	drawLoop();
+</script>
+</html>
+
