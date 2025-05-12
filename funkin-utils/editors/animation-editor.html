@@ -289,6 +289,29 @@
 			updateOffsetDisplay();
 		});
 
+		function drawSpriteSheet(animName, frameIndex, x, y) {
+			const f = animations[animName][frameIndex];
+			const firstFrame = animations[animName][0];
+
+			ctx.save();
+			const fx = flipXCheckbox.checked ? -1 : 1;
+			const fy = flipYCheckbox.checked ? -1 : 1;
+			if (fx < 0 || fy < 0) // this is ass
+				ctx.scale(flipXCheckbox.checked ? -1 : 1, flipYCheckbox.checked ? -1 : 1);
+
+			let mx = x - f.frameX - (centerToggle.checked ? (firstFrame.width / 2) : 0);
+			let my = y - f.frameY - (centerToggle.checked ? (firstFrame.height / 2) : 0);
+			if (fx < 0) mx = -mx - f.width;
+			if (fy < 0) my = -my - f.height;
+
+			ctx.drawImage(
+				spriteSheet,
+				f.x, f.y, f.width, f.height,
+				mx, my, f.width, f.height
+			);
+			ctx.restore();
+		}
+
 		function drawLoop() {
 			const now = performance.now();
 			const elapsed = now - lastTime;
@@ -312,55 +335,14 @@
 			if (ghostToggle.checked) {
 				const gAnim = ghostAnimSelect.value;
 				let gIdx = Math.min(Math.max(0, parseInt(ghostFrameInput.value, 10)), animations[gAnim].length - 1);
-				const gf = animations[gAnim][gIdx];
-				const alpha = ghostOpacitySlider.value / 100;
 
-				const gcx = centerToggle.checked ? (gf.width / 2) : 0;
-				const gcy = centerToggle.checked ? (gf.height / 2) : 0;
-
-				ctx.globalAlpha = alpha;
-				ctx.save();
-
-				const fx = flipXCheckbox.checked ? -1 : 1;
-				const fy = flipYCheckbox.checked ? -1 : 1;
-				if (fx < 0 || fy < 0) ctx.scale(fx, fy);
-
-				let gx = -gf.frameX - gcx + offsets[gAnim].x;
-				let gy = -gf.frameY - gcy + offsets[gAnim].y;
-				if (fx < 0) gx = -(gx + gf.width);
-				if (fy < 0) gy = -(gy + gf.height);
-
-				ctx.drawImage(
-					spriteSheet,
-					gf.x, gf.y, gf.width, gf.height,
-					gx, gy, gf.width, gf.height
-				);
-				ctx.restore();
+				ctx.globalAlpha = ghostOpacitySlider.value / 100;
+				drawSpriteSheet(gAnim, gIdx, offsets[gAnim].x, offsets[gAnim].y);
 				ctx.globalAlpha = 1;
 			}
 
 			if (currentAnim && spriteSheet.complete) {
-				const f = animations[currentAnim][frameIndex];
-
-				const cx = centerToggle.checked ? (f.width / 2) : 0;
-				const cy = centerToggle.checked ? (f.height / 2) : 0;
-
-				ctx.save();
-				const fx = flipXCheckbox.checked ? -1 : 1;
-				const fy = flipYCheckbox.checked ? -1 : 1;
-				if (fx < 0 || fy < 0) ctx.scale(fx, fy);
-
-				let mx = -f.frameX - cx + offsets[currentAnim].x;
-				let my = -f.frameY - cy + offsets[currentAnim].y;
-				if (fx < 0) mx = -mx - f.width;
-				if (fy < 0) my = -my - f.height;
-
-				ctx.drawImage(
-					spriteSheet,
-					f.x, f.y, f.width, f.height,
-					mx, my, f.width, f.height
-				);
-				ctx.restore();
+				drawSpriteSheet(currentAnim, frameIndex, offsets[currentAnim].x, offsets[currentAnim].y);
 			}
 
 			ctx.restore();
