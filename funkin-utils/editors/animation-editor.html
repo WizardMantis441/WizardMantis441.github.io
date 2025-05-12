@@ -3,219 +3,372 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Animation Editor</title>
+	<title>Animation & Offset Editor</title>
 </head>
 <body>
 	<canvas id="canvas"></canvas>
 	<div id="hud">
+	<fieldset>
+		<legend>Import Assets</legend>
 		<label>Sprite PNG: <input type="file" id="imageInput" accept=".png"></label>
 		<label>Sprite XML: <input type="file" id="atlasInput" accept=".xml"></label>
-		<label id="animLabel" style="display: none;">Animation: <select id="animSelect"></select></label>
+	</fieldset>
+	<fieldset id="infoFieldset" style="display:none;">
+		<legend>Sprite Information</legend>
+		<label>Animation: <select id="animSelect"></select></label>
+		<label><input type="checkbox" id="flipX"> Flip X</label>
+		<label><input type="checkbox" id="flipY"> Flip Y</label>
+	</fieldset>
+	<fieldset id="ghostFieldset" style="display:none;">
+		<legend>Ghost Backing</legend>
+		<label><input type="checkbox" id="ghostToggle"> Toggle Ghost</label>
+		<div class="ghost-settings" id="ghostSettings">
+			<label>Ghost Anim: <select id="ghostAnimSelect"></select></label>
+			<label>Frame: <input type="number" id="ghostFrameInput" min="0" value="0" style="width:50px;"></label>
+			<label>
+				Ghost Opacity:
+				<input type="range" id="ghostOpacitySlider" min="0" max="100" value="10">
+				<span id="ghostOpacityValue">10%</span>
+			</label>
+		</div>
+	</fieldset>
+	<fieldset id="editorFieldset" style="display:none;">
+		<legend>Editor Settings</legend>
+		<button id="exportOffsetsBtn">Export Offsets</button>
+		<label><input type="checkbox" id="centerToggle"> Center</label>
+	</fieldset>
 	</div>
-</body>
-<style>
-	body {
+	<div id="offsetDisplay"></div>
+	<style>
+		body {
 		margin: 0;
 		padding: 0;
 		width: 100vw;
 		height: 100vh;
 		background: conic-gradient(#e8e8e8 90deg, #dadada 90deg 180deg, #e8e8e8 180deg 270deg, #dadada 270deg);
-		background-size: 50px 50px;
-		background-position: center;
-		overflow: hidden;
-	}
-	canvas {
-		display: block;
-		position: absolute;
-		top: 0; left: 0;
-	}
-	#hud {
-		position: absolute;
-		top: 10px; left: 10px;
-		background: rgba(255,255,255,0.8);
-		padding: 8px;
-		border-radius: 4px;
-		font-family: sans-serif;
-	}
-	#hud > * {
-		display: block;
-		margin-bottom: 6px;
-	}
-</style>
-
-<script>
-	const canvas = document.getElementById('canvas');
-	const ctx = canvas.getContext('2d');
-
-	function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
-	window.addEventListener('resize', resize);
-	resize(); // ratio stuff blehhhh bleh
-
-	const camera = { x: 0, y: 0, zoom: 1 };
-	let isDragging = false, lastMouse = { x: 0, y: 0 };
-
-	canvas.addEventListener('wheel', e => {
-		e.preventDefault();
-		camera.zoom = Math.min(10, Math.max(0.1, camera.zoom - e.deltaY * 0.0005));
-	});
-
-	canvas.addEventListener('mousedown', e => {
-		isDragging = true;
-		lastMouse = { x: e.clientX, y: e.clientY };
-	});
-
-	canvas.addEventListener('mouseup', () => isDragging = false);
-	canvas.addEventListener('mouseleave', () => isDragging = false);
-
-	canvas.addEventListener('mousemove', e => {
-		if (isDragging) {
-			camera.x -= (e.clientX - lastMouse.x) / camera.zoom;
-			camera.y -= (e.clientY - lastMouse.y) / camera.zoom;
-			lastMouse = { x: e.clientX, y: e.clientY };
+			background-size: 50px 50px;
+			background-position: center;
+			overflow: hidden;
+			font-family: 'JetBrains Mono', monospace;
 		}
-	});
 
-	const sprite = { x: 300, y: 300 };
-	let animations = {};
-	let currentAnim = null;
-	let frameIndex = 0;
-	const FRAME_RATE = 24;
-	const FRAME_DURATION = 1000 / FRAME_RATE;
-	let accTime = 0;
-	let lastTime = performance.now();
-	const spriteSheet = new Image();
+		canvas {
+			display: block;
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
 
-	const imageInput = document.getElementById('imageInput');
-	const atlasInput = document.getElementById('atlasInput');
-	const animLabel  = document.getElementById('animLabel');
-	const animSelect = document.getElementById('animSelect');
+		#hud {
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			background: rgba(0,0,0,0.6);
+			color: #fff;
+			padding: 8px;
+			border-radius: 4px;
+			font-family: 'JetBrains Mono', monospace;
+			display: grid;
+			gap: 8px;
+		}
 
-	atlasInput.addEventListener('change', () => {
-		loadAtlas();
-		if (spriteSheet.complete && Object.keys(animations).length)
-			centerCamera();
-	});
+		fieldset {
+			border: 1px solid #444;
+			padding: 6px;
+			border-radius: 4px;
+		}
 
-	imageInput.addEventListener('change', () => {
-		loadImage();
-		spriteSheet.onload = () => {
-			URL.revokeObjectURL(spriteSheet.src);
-			if (Object.keys(animations).length)
+		legend {
+			font-size: 24;
+			font-weight: bold;
+			font-family: 'JetBrains Mono', monospace;
+		}
+
+		label {
+			display: block;
+			font-size: 14px;
+			font-family: 'JetBrains Mono', monospace;
+		}
+
+		input, select, button {
+			font-size: 14px;
+			font-family: 'JetBrains Mono', monospace;
+		}
+		
+
+		input[type="range"] {
+			vertical-align: middle;
+		}
+
+		#offsetDisplay {
+			position: absolute;
+			bottom: 10px;
+			left: 10px;
+			background: rgba(0,0,0,0.6);
+			color: #fff;
+			padding: 6px 8px;
+			border-radius: 4px;
+			font-family: 'JetBrains Mono', monospace;
+			white-space: pre;
+			pointer-events: none;
+		}
+		.ghost-settings {
+			display: none;
+		}
+	</style>
+
+	<script>
+		const canvas = document.getElementById('canvas');
+		const ctx = canvas.getContext('2d');
+
+		function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+		window.addEventListener('resize', resize);
+		resize(); // bruhhh bruh rbuhhhh bruhh
+
+		const camera = { x: 0, y: 0, zoom: 1 };
+		let isDragging = false, lastMouse = { x: 0, y: 0 };
+
+		canvas.addEventListener('wheel', e => {
+			e.preventDefault();
+			camera.zoom = Math.min(10, Math.max(0.1, camera.zoom - e.deltaY * 0.0005));
+		});
+
+		canvas.addEventListener('mousedown', e => {
+			isDragging = true;
+			lastMouse = { x: e.clientX, y: e.clientY };
+		});
+
+		canvas.addEventListener('mouseup', () => isDragging = false);
+		canvas.addEventListener('mouseleave', () => isDragging = false);
+
+		canvas.addEventListener('mousemove', e => {
+			if (isDragging) {
+				camera.x -= (e.clientX - lastMouse.x) / camera.zoom;
+				camera.y -= (e.clientY - lastMouse.y) / camera.zoom;
+				lastMouse = { x: e.clientX, y: e.clientY };
+			}
+		});
+
+		const spriteSheet = new Image();
+		let animations = {}, currentAnim = null, frameIndex = 0;
+		const FRAME_RATE = 24, FRAME_DURATION = 1000 / FRAME_RATE;
+		let accTime = 0, lastTime = performance.now();
+
+		const offsets = {};
+
+		// killing myself but i like how it makes the code look
+		const imageInput = document.getElementById('imageInput');
+		const atlasInput = document.getElementById('atlasInput');
+		const infoFieldset = document.getElementById('infoFieldset');
+		const ghostFieldset = document.getElementById('ghostFieldset');
+		const editorFieldset = document.getElementById('editorFieldset');
+		const animSelect = document.getElementById('animSelect');
+		const flipXCheckbox = document.getElementById('flipX');
+		const flipYCheckbox = document.getElementById('flipY');
+		const offsetDisplay = document.getElementById('offsetDisplay');
+		const ghostToggle = document.getElementById('ghostToggle');
+		const ghostSettings = document.getElementById('ghostSettings');
+		const ghostAnimSelect = document.getElementById('ghostAnimSelect');
+		const ghostFrameInput = document.getElementById('ghostFrameInput');
+		const ghostOpacitySlider = document.getElementById('ghostOpacitySlider');
+		const ghostOpacityValue = document.getElementById('ghostOpacityValue');
+		const exportBtn = document.getElementById('exportOffsetsBtn');
+		const centerToggle = document.getElementById('centerToggle');
+
+		imageInput.addEventListener('change', loadImage);
+		atlasInput.addEventListener('change', () => {
+			loadAtlas();
+			if (spriteSheet.complete && Object.keys(animations).length)
 				centerCamera();
-		};
-	});
+		});
 
-	animSelect.addEventListener('change', () => {
-		currentAnim = animSelect.value;
-		frameIndex = 0;
-		accTime = 0;
-	});
+		animSelect.addEventListener('change', () => {
+			currentAnim = animSelect.value;
+			frameIndex = 0;
+			accTime = 0;
+			updateOffsetDisplay();
+		});
 
-	function loadImage() {
-		const file = imageInput.files[0];
-		if (file)
-			spriteSheet.src = URL.createObjectURL(file);
-	}
+		// LIKE IM THE BEST IN THE BIZ WHAT???
+		ghostToggle.addEventListener('change', () => { ghostSettings.style.display = ghostToggle.checked ? 'block' : 'none'; });
+		ghostOpacitySlider.addEventListener('input', () => { ghostOpacityValue.textContent = `${ghostOpacitySlider.value}%`; });
 
-	function loadAtlas() {
-		const file = atlasInput.files[0];
-		if (file) {
+		exportBtn.addEventListener('click', () => {
+			const lines = Object.entries(offsets).map(([n, o]) => `${n} - (${0 - o.x}, -${0 - o.y})`);
+			const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = 'offsets.txt';
+			a.click();
+			URL.revokeObjectURL(url);
+		});
+
+		function loadImage() {
+			const f = imageInput.files[0];
+			if (!f) return;
+
+			spriteSheet.src = URL.createObjectURL(f);
+			spriteSheet.onload = () => URL.revokeObjectURL(spriteSheet.src);
+		}
+
+		function loadAtlas() {
+			const f = atlasInput.files[0];
+			if (!f) return;
+
 			const reader = new FileReader();
 			reader.onload = e => {
 				parseAtlas(e.target.result);
-				showAnimsList();
-				if (spriteSheet.complete)
-					centerCamera();
+				populateAnimLists();
+				centerCamera();
 			};
-			reader.readAsText(file);
+			reader.readAsText(f);
 		}
-	}
 
-	function parseAtlas(xmlString) {
-		animations = {};
-		const parser = new DOMParser();
-		const doc = parser.parseFromString(xmlString, "application/xml");
-		const subs = doc.getElementsByTagName('SubTexture');
-		for (let el of subs) {
-			const name = el.getAttribute('name');
-			const key = name.replace(/\d{4}$/, ''); // what the Fuck
-			if (!animations[key]) animations[key] = [];
-			animations[key].push({
-				x:      + el.getAttribute('x'),
-				y:      + el.getAttribute('y'),
-				width:  + el.getAttribute('width'),
-				height: + el.getAttribute('height'),
-				frameX: + el.getAttribute('frameX') || 0,
-				frameY: + el.getAttribute('frameY') || 0,
-				frameW: + el.getAttribute('frameWidth')  || + el.getAttribute('width'),
-				frameH: + el.getAttribute('frameHeight') || + el.getAttribute('height'),
-			});
+		function parseAtlas(xml) {
+			animations = {};
+			const doc = new DOMParser().parseFromString(xml, 'application/xml');
+			for (let el of doc.getElementsByTagName('SubTexture')) {
+				const name = el.getAttribute('name');
+				const key = name.replace(/\d{4}$/, ''); // i still don't really know wtf this is
+				if (!animations[key]) animations[key] = [];
+				animations[key].push({
+					x:      + el.getAttribute('x'),
+					y:      + el.getAttribute('y'),
+					width:  + el.getAttribute('width'),
+					height: + el.getAttribute('height'),
+					frameX: + el.getAttribute('frameX') || 0,
+					frameY: + el.getAttribute('frameY') || 0
+				});
+			}
+
+			for (let k of Object.keys(animations))
+				if (!(k in offsets))
+				offsets[k] = { x: 0, y: 0 };
 		}
-	}
 
-	function showAnimsList() {
-		animSelect.innerHTML = '';
-		Object.keys(animations).forEach(key => {
-			const opt = document.createElement('option');
-			opt.value = key;
-			opt.textContent = key;
-			animSelect.append(opt);
-		});
+		function populateAnimLists() {
+			animSelect.innerHTML = '';
+			ghostAnimSelect.innerHTML = '';
 
-		if (Object.keys(animations).length) {
-			animLabel.style.display = 'block';
-			currentAnim = animSelect.value = Object.keys(animations)[0];
-			frameIndex = 0;
-			accTime = 0;
-		}
-	}
+			for (let k of Object.keys(animations)) {
+				animSelect.add(new Option(k, k));
+				ghostAnimSelect.add(new Option(k, k));
+			}
 
-	function centerCamera() {
-		camera.x = sprite.x - (canvas.width / (2 * camera.zoom));
-		camera.y = sprite.y - (canvas.height / (2 * camera.zoom));
-	}
-
-	function drawLoop() {
-		const now = performance.now();
-		const delta = now - lastTime;
-		lastTime = now;
-
-		// frame stuff
-		if (currentAnim) {
-			accTime += delta;
-			const frames = animations[currentAnim];
-			if (accTime >= FRAME_DURATION) {
-				const step = Math.floor(accTime / FRAME_DURATION);
-				frameIndex = (frameIndex + step) % frames.length;
-				accTime %= FRAME_DURATION;
+			if (Object.keys(animations).length) {
+				currentAnim = animSelect.value = Object.keys(animations)[0];
+				ghostAnimSelect.value = currentAnim;
+				updateOffsetDisplay();
+				infoFieldset.style.display = 'block';
+				ghostFieldset.style.display = 'block';
+				editorFieldset.style.display = 'block';
 			}
 		}
 
-		// ts ass dude why i gotta do all this :sob:
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.save();
-		ctx.scale(camera.zoom, camera.zoom);
-		ctx.translate(-camera.x, -camera.y);
-
-		// draw cur frame
-		if (currentAnim && spriteSheet.complete) {
-			const frame = animations[currentAnim][frameIndex];
-			const dw = frame.frameW, dh = frame.frameH;
-			const dx = sprite.x - dw / 2 + frame.frameX;
-			const dy = sprite.y - dh / 2 + frame.frameY;
-			ctx.drawImage(
-				spriteSheet,
-				frame.x, frame.y, frame.width, frame.height,
-				dx, dy,
-				dw, dh
-			);
+		function centerCamera() {
+			camera.x = -(canvas.width / 2) / camera.zoom;
+			camera.y = -(canvas.height / 2) / camera.zoom;
 		}
 
-		ctx.restore();
-		requestAnimationFrame(drawLoop);
-	}
+		function updateOffsetDisplay() { // one liner function (fnf vslice reference) mainly cuz i am NOT typing this out every time
+			offsetDisplay.innerText = Object.entries(offsets).map(([n, o]) => `${n} - (${0 - o.x}, ${0 - o.y})`).join('\n');
+		}
 
-	drawLoop();
-</script>
+		window.addEventListener('keydown', e => {
+			if (!currentAnim) return;
+			const amt = e.shiftKey ? 5 : 1;
+			switch (e.key) {
+				case 'ArrowLeft': offsets[currentAnim].x -= amt; break;
+				case 'ArrowRight': offsets[currentAnim].x += amt; break;
+				case 'ArrowUp': offsets[currentAnim].y -= amt; break;
+				case 'ArrowDown': offsets[currentAnim].y += amt; break;
+				default: return;
+			}
+			e.preventDefault();
+			updateOffsetDisplay();
+		});
+
+		function drawLoop() {
+			const now = performance.now();
+			const elapsed = now - lastTime;
+			lastTime = now;
+
+			if (currentAnim) {
+				accTime += elapsed;
+				const frames = animations[currentAnim];
+				if (accTime >= FRAME_DURATION) {
+					const step = Math.floor(accTime / FRAME_DURATION);
+					frameIndex = (frameIndex + step) % frames.length;
+					accTime %= FRAME_DURATION;
+				}
+			}
+
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.save();
+			ctx.scale(camera.zoom, camera.zoom);
+			ctx.translate(-camera.x, -camera.y);
+
+			if (ghostToggle.checked) {
+				const gAnim = ghostAnimSelect.value;
+				let gIdx = Math.min(Math.max(0, parseInt(ghostFrameInput.value, 10)), animations[gAnim].length - 1);
+				const gf = animations[gAnim][gIdx];
+				const alpha = ghostOpacitySlider.value / 100;
+
+				const gcx = centerToggle.checked ? (gf.width / 2) : 0;
+				const gcy = centerToggle.checked ? (gf.height / 2) : 0;
+
+				ctx.globalAlpha = alpha;
+				ctx.save();
+
+				const fx = flipXCheckbox.checked ? -1 : 1;
+				const fy = flipYCheckbox.checked ? -1 : 1;
+				if (fx < 0 || fy < 0) ctx.scale(fx, fy);
+
+				let gx = -gf.frameX - gcx + offsets[gAnim].x;
+				let gy = -gf.frameY - gcy + offsets[gAnim].y;
+				if (fx < 0) gx = -(gx + gf.width);
+				if (fy < 0) gy = -(gy + gf.height);
+
+				ctx.drawImage(
+					spriteSheet,
+					gf.x, gf.y, gf.width, gf.height,
+					gx, gy, gf.width, gf.height
+				);
+				ctx.restore();
+				ctx.globalAlpha = 1;
+			}
+
+			if (currentAnim && spriteSheet.complete) {
+				const f = animations[currentAnim][frameIndex];
+
+				const cx = centerToggle.checked ? (f.width / 2) : 0;
+				const cy = centerToggle.checked ? (f.height / 2) : 0;
+
+				ctx.save();
+				const fx = flipXCheckbox.checked ? -1 : 1;
+				const fy = flipYCheckbox.checked ? -1 : 1;
+				if (fx < 0 || fy < 0) ctx.scale(fx, fy);
+
+				let mx = -f.frameX - cx + offsets[currentAnim].x;
+				let my = -f.frameY - cy + offsets[currentAnim].y;
+				if (fx < 0) mx = -mx - f.width;
+				if (fy < 0) my = -my - f.height;
+
+				ctx.drawImage(
+					spriteSheet,
+					f.x, f.y, f.width, f.height,
+					mx, my, f.width, f.height
+				);
+				ctx.restore();
+			}
+
+			ctx.restore();
+			requestAnimationFrame(drawLoop);
+		}
+
+		drawLoop();
+	</script>
+	</script>
+</body>
 </html>
-
