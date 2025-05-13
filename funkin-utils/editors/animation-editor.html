@@ -238,7 +238,9 @@
 					width:  + el.getAttribute('width'),
 					height: + el.getAttribute('height'),
 					frameX: + el.getAttribute('frameX') || 0,
-					frameY: + el.getAttribute('frameY') || 0
+					frameY: + el.getAttribute('frameY') || 0,
+					frameW: + el.getAttribute('frameWidth') || 0,
+					frameH: + el.getAttribute('frameHeight') || 0
 				});
 			}
 
@@ -294,21 +296,23 @@
 			const firstFrame = animations[animName][0];
 
 			ctx.save();
+
 			const fx = flipXCheckbox.checked ? -1 : 1;
 			const fy = flipYCheckbox.checked ? -1 : 1;
-			if (fx < 0 || fy < 0) // this is ass
-				ctx.scale(flipXCheckbox.checked ? -1 : 1, flipYCheckbox.checked ? -1 : 1);
+			if (fx < 0 || fy < 0) ctx.scale(fx, fy);
 
 			let mx = x - f.frameX - (centerToggle.checked ? (firstFrame.width / 2) : 0);
+			if (fx < 0) mx = -mx - f.frameX * 2 - f.frameW;
+
 			let my = y - f.frameY - (centerToggle.checked ? (firstFrame.height / 2) : 0);
-			if (fx < 0) mx = -mx - f.width;
-			if (fy < 0) my = -my - f.height;
+			if (fy < 0) my = -my - f.frameY * 2 - f.frameH;
 
 			ctx.drawImage(
 				spriteSheet,
 				f.x, f.y, f.width, f.height,
 				mx, my, f.width, f.height
 			);
+
 			ctx.restore();
 		}
 
