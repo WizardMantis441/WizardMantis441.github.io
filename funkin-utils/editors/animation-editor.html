@@ -350,7 +350,20 @@
 		}
 
 		drawLoop();
-	</script>
+
+		// im bored so welcome to my tutorail on how to add a button without using html :shocked:
+		const darkModeToggle = document.createElement('input');
+		darkModeToggle.type = 'checkbox';
+		darkModeToggle.id = 'darkModeToggle';
+		const darkModeLabel = document.createElement('label');
+		darkModeLabel.textContent = ' Dark Mode';
+		darkModeLabel.prepend(darkModeToggle);
+		editorFieldset.appendChild(darkModeLabel);
+
+		darkModeToggle.addEventListener('change', () => {
+			document.body.style.background = (darkModeToggle.checked) ?'conic-gradient(#2d3133 90deg, #25282a 90deg 180deg, #2d3133 180deg 270deg, #25282a 270deg)' : 'conic-gradient(#e8e8e8 90deg, #dadada 90deg 180deg, #e8e8e8 180deg 270deg, #dadada 270deg)';
+			document.body.style.backgroundSize = '50px 50px';
+		});
 	</script>
 </body>
 </html>
