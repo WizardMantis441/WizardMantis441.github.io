@@ -130,7 +130,11 @@
 
 		canvas.addEventListener('wheel', e => {
 			e.preventDefault();
-			camera.zoom = Math.min(10, Math.max(0.1, camera.zoom - e.deltaY * 0.0005));
+			let mX = e.clientX, mY = e.clientY;
+			let worldX = mX / camera.zoom + camera.x, worldY = mY / camera.zoom + camera.y;
+			camera.zoom = Math.min(10, Math.max(0.1, camera.zoom - e.deltaY * 0.00075));
+			camera.x = worldX - mX / camera.zoom;
+			camera.y = worldY - mY / camera.zoom;
 		});
 
 		canvas.addEventListener('mousedown', e => {
