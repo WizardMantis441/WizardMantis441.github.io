@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Chart Editor</title>
+</head>
+<body>
+    <div id="top">
+        <div class="top-button file">File</div>
+        <div id="vert-separator"></div>
+        <div class="top-button edit">Edit</div>
+        <div id="vert-separator"></div>
+        <div class="top-button third">The Infamous THIRD BUTTON (shocked)</div>
+    </div>
+    <div id="center">
+        <div id="charter">
+            <canvas id="charterCanvas"></canvas>
+            <div id="playbackBar">pretend a time bar is here for like time stuff i guess</div>
+        </div>
+        <div id="meta">
+            <fieldset id="fieldset">
+                <legend>Test Meta Section</legend>
+                <label><input type="checkbox" id="test-checkbox">Test Checkbox</label>
+                <br>
+                <label><input type="checkbox" id="test-checkbox-killer">The Checkbox That KILLS You</label>
+            </fieldset>
+        </div>
+    </div>
+</body>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    #vert-separator {
+        width: 0.05rem;
+        height: 69%;
+        background-color: rgb(52, 52, 52);
+    }
+
+    #top {
+        background-color: rgb(75, 75, 75);
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+    }
+
+    .top-button {
+        background-color:rgb(57, 57, 57);
+        color:aliceblue;
+        padding: 0.4rem;
+        border-radius: 0.4rem;
+        cursor: pointer;
+    }
+
+    #center {
+        background-color: rgb(61, 61, 61);
+        color: white;
+        height: calc(100vh - 2.5rem);
+        display: flex;
+    }
+
+    /*
+        why u may be asking am i doing "#center #charter" instead of just #charter?
+        first of all it's nuts anyone is reading this dogshit
+        second this is purely so i know where it is i get lost easily please don't judge me -wizard
+    */
+    #center #charter {
+        background-color: rgb(35, 30, 74);
+        width: calc(100vw - 20rem);
+        position: relative;
+    }
+
+    #center #meta {
+        width: 30rem;
+        margin: 1rem;
+    }
+
+    #charterCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    #playbackBar {
+        background-color: rgba(0, 0, 0, 0.5);
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 1.5rem;
+    }
+</style>
+<script>
+    const canvas = document.getElementById("charterCanvas");
+    const ctx = canvas.getContext("2d");
+    
+    const noteImg = new Image();
+    noteImg.src = "../assets/notes.png";
+    const noteFrameW = 622 / 4;
+    const noteFrameH = 157;
+
+    let songData = {
+        bpm: 100,
+        notes: [
+            {
+                id: 2, time: 0, length: 0
+            },
+            {
+                id: 3, time: 3, length: 0
+            },
+            {
+                id: 5, time: 3, length: 0
+            },
+            {
+                id: 4, time: 4, length: 0
+            },
+            {
+                id: 6, time: 6, length: 0
+            },
+            {
+                id: 7, time: 6.5, length: 0
+            }
+        ]
+    }
+
+    let songPosition = 0;
+    let yOffset = -100;
+    
+    function resize() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width; canvas.height = rect.height;
+    } window.addEventListener('resize', resize); resize(); // f u resize my #1 OPP!!!
+
+    function draw() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 1;
+
+        let gridSize = 50;
+        let gridsHoriz = 9; // 1 for events, 4 for opponent strums, 4 for player strums
+        let gridsVert = 100; // temp
+
+        const xPos = canvas.width / 2 - 5 * gridSize;
+        const yPos = yOffset + canvas.height / 2;
+
+        let everyOther = false;
+        for (let j = 0; j < gridsVert; j++) {
+            for (let i = 0; i < gridsHoriz; i++) {
+                ctx.fillStyle = everyOther ? "rgb(0, 0, 0, 0.25)" : "rgb(0, 0, 0, 0.125)";
+                ctx.fillRect(xPos + i * gridSize, yPos + j * gridSize, gridSize, gridSize);
+                everyOther = !everyOther;
+
+                ctx.strokeStyle = "black"; // lil outline tee hee
+                ctx.strokeRect(xPos + i * gridSize, yPos + j * gridSize, gridSize, gridSize);
+            }   
+        }
+
+        ctx.lineWidth = 2.75;
+        for (let i = 1; i <= 9; i += 4) {
+            ctx.beginPath();
+            ctx.moveTo(xPos + i * gridSize, 0);
+            ctx.lineTo(xPos + i * gridSize, canvas.height);
+            ctx.stroke();
+        }
+        
+        // TODO: the notes
+        songData.notes.forEach(note => {
+            const colIndex = note.id + 1;
+
+            const noteX = xPos + colIndex * gridSize;
+
+            const pixelsPerBeat = gridSize; // for now
+            const noteY = yPos + note.time * pixelsPerBeat;
+
+            const sx = (note.id % 4) * noteFrameW;
+            const sy = 0;
+
+            ctx.drawImage(
+                noteImg,
+                sx, sy, noteFrameW, noteFrameH,
+                noteX, noteY,
+                gridSize, gridSize
+            );
+        });
+
+        // TODO: empty space on top / bottom of the chart
+
+        ctx.beginPath();
+        ctx.moveTo(xPos - 10, yPos);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "red"; // lil outline tee hee
+        ctx.lineTo(xPos + gridsHoriz * gridSize + 10, yPos);
+        ctx.stroke();
+        
+    }
+
+    setInterval(draw, 0);
+</script>
