@@ -95,65 +95,142 @@
     }
 </style>
 <script>
+    class Conductor {
+        crochet; stepCrochet; changes = [];
+
+        loadBpmChanges(changes) {
+            this.crochet = 60 / changes[0].bpm * 1000;
+            this.stepCrochet = this.crochet / 4;
+
+            let prevTime = 0;
+            let prevSteps = 0;
+
+            for (let i = 0; i < changes.length; i++) {
+                let curChange = changes[i];
+                let newSteps = prevSteps + (curChange.t - prevTime) / ((60 / (i == 0 ? curChange.bpm : changes[i - 1].bpm) * 1000) / 4); // KILLING MYSELF HOLY FUCK
+                this.changes.push({time: curChange.t, bpm: curChange.bpm, step: newSteps});
+                prevTime = curChange.t;
+                prevSteps = newSteps;
+            }
+
+            // console.log('bpm changes:')
+            // this.changes.forEach(change => {
+            //     console.log(`Time: ${change.time}, BPM: ${change.bpm}, Step: ${change.step}`);
+            // })
+        }
+
+        time; curBPM; curStep; curBeat; curMeasure;
+        updateTime(time) {
+            if (time == 0) {
+                this.curBPM = this.changes[0].bpm;
+                this.curStep = this.curBeat = this.curMeasure = 0;
+            }
+
+            let lastChangeTime = 0;
+            this.time = time;
+            this.curStep = 0;
+            this.changes.forEach(change => {
+                if (this.time > change.time) {
+                    this.curStep = change.step;
+                    this.curBPM = change.bpm;
+                    lastChangeTime = change.time;
+                }
+            })
+
+            this.curStep += (this.time - lastChangeTime) / (60 / this.curBPM) / 1000 * 4;
+            this.curBeat = this.curStep / 4; // until i get time signatures working
+            this.curMeasure = this.curBeat / 4; // until i get timYOU GET IT >:(
+        }
+
+        getYForNote(note, gridSize) {
+            let y = 0;
+
+            let step = 0;
+            let remainingTime = 0;
+            let lastBPM = 0;
+            this.changes.forEach(change => {
+                if (note.time > change.time) {
+                    step = change.step;
+                    remainingTime = note.time - change.time;
+                    lastBPM = change.bpm;
+                }
+            });
+
+            step += remainingTime / (60 / lastBPM) / 1000 * 4;
+            y = step * gridSize;
+
+            return y;
+        }
+    }
+
     const canvas = document.getElementById("charterCanvas");
     const ctx = canvas.getContext("2d");
     
-    const noteImg = new Image();
-    noteImg.src = "../assets/notes.png";
+    const noteSprite = new Image();
     const noteFrameW = 622 / 4;
     const noteFrameH = 157;
-
-    let songData = {
-        bpm: 100,
-        notes: [
-            {
-                id: 2, time: 0, length: 0
-            },
-            {
-                id: 3, time: 3, length: 0
-            },
-            {
-                id: 5, time: 3, length: 0
-            },
-            {
-                id: 4, time: 4, length: 0
-            },
-            {
-                id: 6, time: 6, length: 0
-            },
-            {
-                id: 7, time: 6.5, length: 0
-            }
-        ]
-    }
-
-    let songPosition = 0;
-    let yOffset = -100;
+    noteSprite.src = "../assets/notes.png";
     
     function resize() {
         const rect = canvas.getBoundingClientRect();
         canvas.width = rect.width; canvas.height = rect.height;
     } window.addEventListener('resize', resize); resize(); // f u resize my #1 OPP!!!
 
-    function draw() {
+    let songData = {
+        timeChanges: [
+            {"t": 0, "bpm": 100},
+            {"t": 1200, "bpm": 150}, // at 1 second bpm goes to 150
+            {"t": 2000, "bpm": 300}, // at 2 seconds bpm goes to 100
+        ],
+        notes: [
+            { id: 2, time: 0, length: 0 },
+            { id: 3, time: 600, length: 0 },
+            { id: 3, time: 1200, length: 0 },
+            { id: 6, time: 2400, length: 0 },
+            { id: 7, time: 3000, length: 0 },
+            { id: 7, time: 3600, length: 0 }
+        ],
+        events: [],
+        meta: []
+    }
+
+    let songPosition = 0;
+    const conductor = new Conductor(100);
+    conductor.loadBpmChanges(songData.timeChanges);
+
+    let paused = true;
+    let yOffset = -100;
+    let prevTime = Date.now();
+    function update() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 1;
+        ctx.strokeStyle = "black";
+        
+        let currentTime = Date.now();
+        let elapsed = currentTime - prevTime;
+        prevTime = currentTime;
+
+        if (!paused)
+            songPosition += elapsed;
+
+        conductor.updateTime(songPosition);
+
+        const playbackBar = document.getElementById("playbackBar");
+        playbackBar.innerHTML = `BPM: ${conductor.curBPM} / Step: ${Math.floor(conductor.curStep)} / Beat: ${Math.floor(conductor.curBeat)} / Measure: ${Math.floor(conductor.curMeasure)} / SongPos: ${Math.floor(songPosition) / 1000}`;
 
         let gridSize = 50;
         let gridsHoriz = 9; // 1 for events, 4 for opponent strums, 4 for player strums
-        let gridsVert = 100; // temp
+        let gridsVert = 1000; // temp
 
         const xPos = canvas.width / 2 - 5 * gridSize;
-        const yPos = yOffset + canvas.height / 2;
+        const yPos = yOffset + canvas.height / 2 - conductor.curStep * gridSize;
 
         let everyOther = false;
         for (let j = 0; j < gridsVert; j++) {
             for (let i = 0; i < gridsHoriz; i++) {
+                everyOther = !everyOther;
                 ctx.fillStyle = everyOther ? "rgb(0, 0, 0, 0.25)" : "rgb(0, 0, 0, 0.125)";
                 ctx.fillRect(xPos + i * gridSize, yPos + j * gridSize, gridSize, gridSize);
-                everyOther = !everyOther;
-
-                ctx.strokeStyle = "black"; // lil outline tee hee
                 ctx.strokeRect(xPos + i * gridSize, yPos + j * gridSize, gridSize, gridSize);
             }   
         }
@@ -171,31 +248,36 @@
             const colIndex = note.id + 1;
 
             const noteX = xPos + colIndex * gridSize;
-
-            const pixelsPerBeat = gridSize; // for now
-            const noteY = yPos + note.time * pixelsPerBeat;
+            const noteY = yPos + conductor.getYForNote(note, gridSize);
 
             const sx = (note.id % 4) * noteFrameW;
             const sy = 0;
 
             ctx.drawImage(
-                noteImg,
+                noteSprite,
                 sx, sy, noteFrameW, noteFrameH,
                 noteX, noteY,
                 gridSize, gridSize
             );
         });
 
-        // TODO: empty space on top / bottom of the chart
-
         ctx.beginPath();
-        ctx.moveTo(xPos - 10, yPos);
+        ctx.moveTo(xPos - 10, yPos + conductor.curStep * gridSize);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = "red"; // lil outline tee hee
-        ctx.lineTo(xPos + gridsHoriz * gridSize + 10, yPos);
+        ctx.strokeStyle = "red";
+        ctx.lineTo(xPos + gridsHoriz * gridSize + 10, yPos + conductor.curStep * gridSize);
         ctx.stroke();
-        
     }
 
-    setInterval(draw, 0);
+    window.addEventListener('keydown', function(event) {
+        if (event.code === 'Space') {
+            paused = !paused;
+        }
+    });
+
+    window.addEventListener('wheel', e => {
+        songPosition += e.deltaY;
+    });
+
+    setInterval(update, 0);
 </script>
