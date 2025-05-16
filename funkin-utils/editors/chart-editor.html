@@ -7,7 +7,10 @@
 </head>
 <body>
     <div id="top">
-        <div class="top-button file">File</div>
+        <div class="top-button file">VSlice Import (temp button)
+            <input type="file" id="fnfc-import" accept=".fnfc" style="display:none">
+            <button id="import-btn" style="margin-left:1rem;">Import .fnfc</button>
+        </div>
         <div id="vert-separator"></div>
         <div class="top-button edit">Edit</div>
         <div id="vert-separator"></div>
@@ -94,6 +97,7 @@
         height: 1.5rem;
     }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script> <!-- zip file parsing -->
 <script>
     class Conductor {
         crochet; stepCrochet; changes = [];
@@ -101,6 +105,7 @@
         loadBpmChanges(changes) {
             this.crochet = 60 / changes[0].bpm * 1000;
             this.stepCrochet = this.crochet / 4;
+            this.changes = [];
 
             let prevTime = 0;
             let prevSteps = 0;
@@ -113,10 +118,9 @@
                 prevSteps = newSteps;
             }
 
-            // console.log('bpm changes:')
-            // this.changes.forEach(change => {
-            //     console.log(`Time: ${change.time}, BPM: ${change.bpm}, Step: ${change.step}`);
-            // })
+            // console.log(`loaded ${this.changes.length} bpm changes`);
+            // for (const change of this.changes)
+            //     console.log(`${change.time} ${change.bpm} ${change.step}`);
         }
 
         time; curBPM; curStep; curBeat; curMeasure;
@@ -179,19 +183,33 @@
     let songData = {
         timeChanges: [
             {"t": 0, "bpm": 100},
-            {"t": 1200, "bpm": 150}, // at 1.2 second bpm goes to 150
-            {"t": 2000, "bpm": 300}, // at 2 seconds bpm goes to 100
+            // {"t": 1200, "bpm": 150}, // at 1.2 second bpm goes to 150
+            // {"t": 2000, "bpm": 300}, // at 2 seconds bpm goes to 100
         ],
-        notes: [
-            { id: 2, time: 0, length: 0 },
-            { id: 3, time: 600, length: 0 },
-            { id: 3, time: 1200, length: 0 },
-            { id: 6, time: 2400, length: 0 },
-            { id: 7, time: 3000, length: 0 },
-            { id: 7, time: 3600, length: 0 }
-        ],
+        notes: {
+            "hard": [
+                // { id: 2, time: 0, length: 0 },
+                // { id: 3, time: 600, length: 0 },
+                // { id: 3, time: 1200, length: 0 },
+                // { id: 6, time: 2400, length: 0 },
+                // { id: 7, time: 3000, length: 0 },
+                // { id: 7, time: 3600, length: 0 }
+            ]
+        },
         events: [],
-        meta: []
+        meta: {
+            name: "Test Song",
+            artist: "John Cena",
+            charter: "That's You!",
+            opponent: "dad",
+            opponentVocals: "dad",
+            girlfriend: "gf",
+            player: "bf",
+            playerVocals: "bf",
+            stage: "mainStage",
+            style: "funkin",
+            scrollSpeed: { "hard": 2.9, "default": 2 }
+        }
     }
 
     let songPosition = 0;
@@ -201,8 +219,54 @@
     let paused = true;
     let yOffset = -100;
     let prevTime = Date.now();
+    let lastSongPosition = 0;
+    let lastPaused = true;
+
+    function setAudioTime(timeSec) {
+        if (window.instAudioElem)
+            window.instAudioElem.currentTime = timeSec;
+        if (window.voicesAudioElems)
+            for (const char in window.voicesAudioElems)
+                window.voicesAudioElems[char].currentTime = timeSec;
+    }
+
+    function playAudio() {
+        if (window.instAudioElem) {
+            window.instAudioElem.muted = false;
+            window.instAudioElem.play();
+        }
+        if (window.voicesAudioElems) {
+            for (const char in window.voicesAudioElems) {
+                window.voicesAudioElems[char].muted = false;
+                window.voicesAudioElems[char].play();
+            }
+        }
+    }
+
+    function pauseAudio() {
+        if (window.instAudioElem) {
+            window.instAudioElem.pause();
+            window.instAudioElem.muted = true;
+        }
+        if (window.voicesAudioElems) {
+            for (const char in window.voicesAudioElems) {
+                window.voicesAudioElems[char].pause();
+                window.voicesAudioElems[char].muted = true;
+            }
+        }
+    }
+
+    function getAudioCurrentTime() {
+        if (window.instAudioElem)
+            return window.instAudioElem.currentTime;
+        if (window.voicesAudioElems)
+            for (const char in window.voicesAudioElems)
+                return window.voicesAudioElems[char].currentTime;
+        return 0;
+    }
+
     function update() {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 1;
         ctx.strokeStyle = "black";
         
@@ -210,8 +274,25 @@
         let elapsed = currentTime - prevTime;
         prevTime = currentTime;
 
-        if (!paused)
-            songPosition += elapsed;
+        let songPositionChanged = songPosition !== lastSongPosition;
+        let pausedChanged = paused !== lastPaused;
+
+        if (!paused) {
+            if (pausedChanged || songPositionChanged) {
+                setAudioTime(songPosition / 1000);
+                playAudio();
+            }
+            if (window.instAudioElem && !window.instAudioElem.paused) {
+                // my idea is now it's linked to a Real Thing yk
+                songPosition = getAudioCurrentTime() * 1000;
+            }
+        } else {
+            if (pausedChanged) pauseAudio();
+            if (songPositionChanged) setAudioTime(songPosition / 1000);
+        }
+
+        lastSongPosition = songPosition;
+        lastPaused = paused;
 
         conductor.updateTime(songPosition);
 
@@ -243,23 +324,21 @@
             ctx.stroke();
         }
         
-        // TODO: the notes
-        songData.notes.forEach(note => {
-            const colIndex = note.id + 1;
-
-            const noteX = xPos + colIndex * gridSize;
-            const noteY = yPos + conductor.getYForNote(note, gridSize);
-
-            const sx = (note.id % 4) * noteFrameW;
-            const sy = 0;
-
-            ctx.drawImage(
-                noteSprite,
-                sx, sy, noteFrameW, noteFrameH,
-                noteX, noteY,
-                gridSize, gridSize
-            );
-        });
+        if (songData.notes && Array.isArray(songData.notes['hard'])) { // iiii doo nt knoww
+            songData.notes['hard'].forEach(note => {
+                const colIndex = ((note.id + 4) % 8) + 1;
+                const noteX = xPos + colIndex * gridSize;
+                const noteY = yPos + conductor.getYForNote(note, gridSize);
+                const sx = (note.id % 4) * noteFrameW;
+                const sy = 0;
+                ctx.drawImage(
+                    noteSprite,
+                    sx, sy, noteFrameW, noteFrameH,
+                    noteX, noteY,
+                    gridSize, gridSize
+                );
+            });
+        }
 
         ctx.beginPath();
         ctx.moveTo(xPos - 10, yPos + conductor.curStep * gridSize);
@@ -268,6 +347,8 @@
         ctx.lineTo(xPos + gridsHoriz * gridSize + 10, yPos + conductor.curStep * gridSize);
         ctx.stroke();
     }
+
+    setInterval(update, 0);
 
     window.addEventListener('keydown', function(event) {
         if (event.code === 'Space') {
@@ -279,5 +360,93 @@
         songPosition += e.deltaY;
     });
 
-    setInterval(update, 0);
+    const importBtn = document.getElementById('import-btn');
+    const fnfcInput = document.getElementById('fnfc-import');
+
+    importBtn.onclick = () => fnfcInput.click();
+
+    fnfcInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const zip = await JSZip.loadAsync(file);
+
+        let chartJson, metaJson, manifestJson;
+        let instAudio, voicesAudio = {};
+        const baseName = file.name.replace(/\.fnfc$/i, ''); // case sensitive replacement like a boss (dabs)
+
+        for (const fileName of Object.keys(zip.files)) {
+            if (fileName.endsWith('-chart.json')) chartJson = await zip.file(fileName).async('string');
+            else if (fileName.endsWith('-metadata.json')) metaJson = await zip.file(fileName).async('string');
+            else if (fileName === 'manifest.json') manifestJson = await zip.file(fileName).async('string');
+            else if (fileName === 'Inst.ogg') instAudio = await zip.file(fileName).async('blob'); // blob lol
+            else if (/Voices-(.+)\.ogg$/.test(fileName)) {
+                const char = fileName.match(/Voices-(.+)\.ogg$/)[1]; // so this is nuts but a pretty cool way to store it
+                voicesAudio[char] = await zip.file(fileName).async('blob');
+            }
+        }
+
+        let chartData, metaData, manifestData;
+        try { chartData = JSON.parse(chartJson); } catch (err) {
+            alert(`Error parsing vslice chart: "${err}"`);
+            return;
+        }
+        try { metaData = metaJson ? JSON.parse(metaJson) : {}; } catch (err) {
+            alert(`Error parsing vslice metadata: "${err}"`);
+            return;
+        }
+        try { manifestData = manifestJson ? JSON.parse(manifestJson) : {}; } catch (err) {
+            alert(`Error parsing vslice manifest??? bro wtf are u doing how do you even do this anywho heres the error ig: "${err}"`);
+            // return;
+        }
+
+        if (chartData && metaData) {
+            songData = {};
+
+            songData.name = "Test Song",
+            songData.artist = "John Cena",
+            songData.charter = "That's You!",
+            songData.opponent = "dad",
+            songData.opponentVocals = "dad",
+            songData.girlfriend = "gf",
+            songData.player = "bf",
+            songData.playerVocals = "bf",
+            songData.stage = "mainStage",
+            songData.style = "funkin",
+            songData.scrollSpeed = { "hard": 2.9, "default": 2 }
+
+            songData.notes = {};
+            for (const difficulty in chartData.notes) {
+                chartData.notes[difficulty].forEach(note => {
+                    const newNote = {id: note.d, time: note.t, length: note.l};
+                    if (!songData.notes[difficulty]) songData.notes[difficulty] = [];
+                    songData.notes[difficulty].push(newNote);
+                });
+            }
+
+            songData.timeChanges = [];
+            for (const timeChange of metaData.timeChanges) {
+                const newTimeChange = {t: timeChange.t, bpm: timeChange.bpm};
+                songData.timeChanges.push(newTimeChange);
+            };
+
+            conductor.loadBpmChanges(songData.timeChanges);
+        }
+
+        songPosition = 0;
+        paused = true;
+        
+        if (instAudio) {
+            if (window.instAudioElem) window.instAudioElem.remove();
+            const url = URL.createObjectURL(instAudio);
+            window.instAudioElem = new Audio(url);
+            window.instAudioElem.loop = true;
+        }
+
+        window.voicesAudioElems = {};
+        for (const char in voicesAudio) {
+            const url = URL.createObjectURL(voicesAudio[char]);
+            window.voicesAudioElems[char] = new Audio(url);
+        }
+    };
 </script>
