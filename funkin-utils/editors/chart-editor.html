@@ -165,6 +165,19 @@
 
             return y;
         }
+
+        getTimeForStep(step) {
+            let time = 0;
+            let lastChange = this.changes[0];
+            for (let i = 1; i < this.changes.length; i++) {
+                if (step < this.changes[i].step) break;
+                lastChange = this.changes[i];
+            }
+            let stepOffset = step - lastChange.step;
+            let msPerStep = (60 / lastChange.bpm) * 1000 / 4;
+            time = lastChange.time + stepOffset * msPerStep;
+            return time;
+        }
     }
 
     const canvas = document.getElementById("charterCanvas");
@@ -265,6 +278,92 @@
         return 0;
     }
 
+    let snapDivisions = 16; // default is 1 / 16
+    let hoveredGrid = null; // {col, snapStep, time}
+    let selectedNotes = [];
+
+    let isDragging = false;
+    let dragStart = null;
+
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
+        
+        let gridSize = 50, gridsHoriz = 9; // temp vars i dont feel like rewriting a bunch lol
+        let xPos = canvas.width / 2 - 5 * gridSize;
+        let yPos = yOffset + canvas.height / 2 - conductor.curStep * gridSize;
+        
+        let col = Math.floor((mouseX - xPos) / gridSize);
+        let relY = mouseY - yPos;
+        let step = relY / gridSize;
+
+        let snappedStep = Math.floor(step * (snapDivisions / 16)) / (snapDivisions / 16);
+        let snappedTime = conductor.getTimeForStep(snappedStep);
+        hoveredGrid = {col, snapStep: snappedStep, time: snappedTime};
+    });
+
+    canvas.addEventListener('mouseleave', () => { hoveredGrid = null; });
+
+    canvas.addEventListener('mousedown', (e) => {
+        if (!hoveredGrid || hoveredGrid.col < 0 || hoveredGrid.col > 8) return;
+        if (e.button === 0) {
+            let id = getIdForCol(hoveredGrid.col);
+            if (id === null) return;
+
+            let note = findNoteAt(hoveredGrid.col, hoveredGrid.time);
+            if (note) {
+                if (e.ctrlKey) selectedNotes.push(note);
+                else selectedNotes = [note];
+            } else {
+                songData.notes['hard'].push({id: id, time: hoveredGrid.time, length: 0});
+                selectedNotes = [];
+            }
+        } else if (e.button === 2) { // right click
+            let noteIdx = findNoteIndexAt(hoveredGrid.col, hoveredGrid.time);
+            if (noteIdx !== -1) {
+                songData.notes['hard'].splice(noteIdx, 1);
+                selectedNotes = [];
+            }
+        }
+    });
+
+    canvas.addEventListener('contextmenu', (e) => {
+        if (e.target === canvas)
+            e.preventDefault();
+    });
+
+    window.addEventListener('keydown', (e) => {
+        switch (e.code) {
+            case "Delete":
+            case "Backspace":
+                e.preventDefault();
+                if (selectedNotes.length > 0) {
+                    songData.notes['hard'] = songData.notes['hard'].filter(n => !selectedNotes.includes(n));
+                    selectedNotes = [];
+                }
+                break;
+            case "KeyQ": snapDivisions = Math.max(1, snapDivisions / 2); break; // these are temp, ima have set values in an array or smth
+            case "KeyE": snapDivisions = Math.min(64, snapDivisions * 2); break;
+        }
+    });
+
+    function findNoteAt(col, time) { return songData.notes['hard'].find(n => getColForId(n.id) === col && Math.abs(n.time - time) < 10); }
+    function findNoteIndexAt(col, time) { return songData.notes['hard'].findIndex(n => getColForId(n.id) === col && Math.abs(n.time - time) < 10); }
+
+    function getIdForCol(col) {
+        if (col === 0) return -1; // event
+        if (col >= 1 && col <= 4) return col + 3;
+        if (col >= 5 && col <= 8) return col - 5;
+        return null;
+    }
+
+    function getColForId(id) {
+        if (id === -1) return 0;
+        if (id >= 4 && id <= 7) return id - 3;
+        if (id >= 0 && id <= 3) return id + 5;
+        return null;
+    }
+
     function update() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 1;
@@ -324,10 +423,12 @@
             ctx.stroke();
         }
         
-        if (songData.notes && Array.isArray(songData.notes['hard'])) { // iiii doo nt knoww
+        if (songData.notes && Array.isArray(songData.notes['hard'])) {
             songData.notes['hard'].forEach(note => {
-                const colIndex = ((note.id + 4) % 8) + 1;
-                const noteX = xPos + colIndex * gridSize;
+                const col = getColForId(note.id);
+                if (col === null) return;
+
+                const noteX = xPos + col * gridSize;
                 const noteY = yPos + conductor.getYForNote(note, gridSize);
                 const sx = (note.id % 4) * noteFrameW;
                 const sy = 0;
@@ -346,6 +447,25 @@
         ctx.strokeStyle = "red";
         ctx.lineTo(xPos + gridsHoriz * gridSize + 10, yPos + conductor.curStep * gridSize);
         ctx.stroke();
+
+        if (hoveredGrid && hoveredGrid.col >= 1 && hoveredGrid.col <= 8) {
+            const noteX = xPos + hoveredGrid.col * gridSize;
+            const noteY = yPos + hoveredGrid.snapStep * gridSize;
+            ctx.globalAlpha = 0.25;
+            ctx.drawImage(noteSprite, noteFrameW * ((hoveredGrid.col - 1) % 4), 0, noteFrameW, noteFrameH, noteX, noteY, gridSize, gridSize);
+            ctx.globalAlpha = 1.0;
+        }
+        
+        selectedNotes.forEach(note => {
+            const colIndex = getColForId(note.id);
+            if (colIndex === null) return;
+
+            const noteX = xPos + colIndex * gridSize;
+            const noteY = yPos + conductor.getYForNote(note, gridSize);
+            ctx.strokeStyle = 'yellow';
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(noteX, noteY, gridSize, gridSize);
+        });
     }
 
     setInterval(update, 0);
@@ -357,7 +477,8 @@
     });
 
     window.addEventListener('wheel', e => {
-        songPosition += e.deltaY;
+        if (!e.ctrlKey)
+            songPosition += e.deltaY;
     });
 
     const importBtn = document.getElementById('import-btn');
