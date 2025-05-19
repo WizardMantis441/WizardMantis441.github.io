@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Level Scraper</title>
+</head>
+<body>
+    <main>
+        <div id="params">
+            <h1>Level Scraper</h1>
+            <p>Under construction</p>
+            <p>pretend parameters for filtering levels and a "scrape" button is up here</p>
+        </div>
+        <div id="lists">
+            <div id="no-match">
+                <div class="level-container">
+                    wow its a level awesome
+                </div>
+            </div>
+            <div id="match">
+                yeah
+            </div>
+        </div>
+    </main>
+</body>
+<style>
+    @font-face {
+        font-family: SMM;
+        src: url('Super Mario Maker Font.ttf');
+    }
+
+    body {
+        margin: 0; padding: 0;
+        background-color: #905ded;
+        display: flex;
+        justify-content: center;
+        font-family: SMM;
+    }
+
+    main {
+        background-color: #4051b1;
+        width: 40rem; height: 100vh;
+        max-width: calc(100% - 5rem);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #params {
+        background-color: #0098dd;
+        width: 100%; height: 20%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #lists {
+        width: 100%; height: 80%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #no-match {
+        background-color: #e58f16;
+        width: 100%; height: calc(100% - 45px);
+        margin: 10px; padding: 10px;
+        margin-right: 5px;
+    }
+
+    #match {
+        background-color: #26afa0;
+        width: 100%; height: calc(100% - 45px);
+        margin: 10px; padding: 10px;
+        margin-left: 5px;
+    }
+
+    .level-container {
+        background-color: #fffdee;
+        color: #5d1c1c;
+        width: 100%; height: 12.5%;
+    }
+</style>
+</html>
