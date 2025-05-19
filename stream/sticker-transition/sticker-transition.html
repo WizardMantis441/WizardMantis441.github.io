@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>title</title>
+</head>
+<body>
+	<div id="debug">hey guys</div>
+	<canvas id="canvas" width="1280" height="720"></canvas>
+</body>
+<style>
+	#debug {
+		position: absolute;
+		top: 0;
+		left: 0;
+		font-size: 50px;
+		font-family: 'JetBrains Mono', monospace;
+	}
+</style>
+<script>
+	const canvas = document.getElementById('canvas');
+	const ctx = canvas.getContext('2d');
+
+	let lastTime = Date.now();
+	let curTime = Date.now();
+	function getElapsed() { curTime = Date.now(); let e = curTime - lastTime; lastTime = curTime; return e; }
+
+	let stickerSetIndex = 0;
+	let loadedStickers = [];
+
+	function update() {
+		let elapsed = getElapsed(); // idk it looks kinda clean
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		for (const sticker of loadedStickers) {
+			const img = preloadedImages[sticker.src];
+			ctx.drawImage(img, sticker.x - img.width * 0.25, sticker.y - img.height * 0.25);
+		}
+	}
+
+	let stickerSets = ['stickers/stickers-set-1', 'stickers/stickers-set-2'];
+	let stickerMeta = {}, preloadedImages = {};
+
+	stickerSets.forEach(setPath => { // preloading time baby (ty fnf for having a meta file in every sticker pack (grins))
+		fetch(`${setPath}/stickers.json`).then(response => response.json()).then(data => {
+			stickerMeta[setPath] = data;
+			for (const [character, stickers] of Object.entries(data.stickers)) {
+				stickers.forEach(stickerName => {
+					const img = new Image(); img.src = `${setPath}/${stickerName}.png`;
+					preloadedImages[`${setPath}/${stickerName}.png`] = img;
+				});
+			}
+		});
+	});
+
+	function getStickerSetPaths(setPath) {
+		const meta = stickerMeta[setPath]; if (!meta) return [];
+		
+		let paths = [];
+		for (const [character, stickers] of Object.entries(meta.stickers)) stickers.forEach(stickerName => { paths.push(`${setPath}/${stickerName}.png`); });
+		return paths;
+	}
+
+	window.addEventListener('transitionStart', async function (event) {
+		document.getElementById('debug').innerHTML = 'start';
+
+		let randomSet = stickerSets[Math.floor(Math.random() * stickerSets.length)];
+		let stickerWidth = 8, stickerHeight = 6; // make a grid
+		let paths = getStickerSetPaths(randomSet);
+
+		for (const y of Array(stickerHeight).keys()) {
+			for (const x of Array(stickerWidth).keys()) {
+				const sticker = {
+					src: paths[Math.floor(Math.random() * paths.length)],
+					x: x * canvas.width / stickerWidth,
+					y: y * canvas.height / stickerHeight
+				};
+				loadedStickers.push(sticker);
+				await new Promise(resolve => setTimeout(resolve, 900 / (stickerWidth * stickerHeight)));
+			}
+		}
+
+		await new Promise(resolve => setTimeout(resolve, 100));
+
+		document.getElementById('debug').innerHTML = 'end';
+
+		while (loadedStickers.length > 0) {
+			loadedStickers.shift();
+			await new Promise(resolve => setTimeout(resolve, 900 / paths.length));
+		}
+	});
+
+	setInterval(update, 0);
+</script>
+</html>
