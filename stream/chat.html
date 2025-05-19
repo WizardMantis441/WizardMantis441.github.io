@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<style>
+	@font-face {
+		font-family: 'FNF';
+		src: url('fnf.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+	}
+	</style>
+</head>
+<body><canvas id="canvas" width="400" height="720"></canvas></body>
+<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+<script>
+	const canvas = document.getElementById('canvas');
+	const ctx = canvas.getContext('2d');
+
+	const boxImage = new Image(); boxImage.src = 'box.png';
+	const maskImage = new Image(); maskImage.src = 'box-mask.png';
+	const noteExtImage = new Image(); noteExtImage.src = 'note-exterior.png';
+	const noteShadImage = new Image(); noteShadImage.src = 'note-highlight.png';
+	const noteIntImage = new Image(); noteIntImage.src = 'note-interior.png';
+
+	let lerpingChatHeights = [];
+	let chatData = [];
+	let totalHeight = 0;
+
+	let lastTime = Date.now();
+	let curTime = Date.now();
+
+	function update() {
+		curTime = Date.now(); // elapsed ass moment
+		let elapsed = curTime - lastTime;
+		lastTime = curTime;
+
+		const scale = 2;
+		const boxW = boxImage.width * scale, boxH = boxImage.height * scale;
+		const boxX = (canvas.width  - boxW) / 2, boxY = canvas.height - boxH;
+		const maxWidth = boxW - 44;
+		const lineHeight = 36;
+
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		// notes
+
+		const notesCanvas = document.createElement('canvas');
+		const notesCtx = notesCanvas.getContext('2d');
+		notesCanvas.width = canvas.width; notesCanvas.height = canvas.height;
+		drawNotes(notesCtx, boxX, boxY, boxW, boxH);
+
+		const maskCanvas = document.createElement('canvas');
+		const maskCtx = maskCanvas.getContext('2d');
+		maskCanvas.width = canvas.width; maskCanvas.height = canvas.height;
+		maskCtx.drawImage(boxImage, 0, 0, boxImage.width, boxImage.height, boxX, boxY, boxW, boxH);
+		
+		const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
+		const notesData = notesCtx.getImageData(0, 0, canvas.width, canvas.height);
+		// this makes more sense in my head but it would be nice if i made a function called like maskImage and the function params could be like "add" or "sub" to deal with alpha
+		for (let i = 0; i < notesData.data.length; i += 4) if (maskData.data[i + 3] > 0) notesData.data[i + 3] = 0;
+		notesCtx.putImageData(notesData, 0, 0);
+		ctx.drawImage(notesCanvas, 0, 0);
+
+		// box
+
+		ctx.imageSmoothingEnabled = false;
+		ctx.drawImage(boxImage, 0, 0, boxImage.width, boxImage.height, boxX, boxY, boxW, boxH);
+		ctx.imageSmoothingEnabled = true;
+
+		// text names (im going to kill someone)
+
+		const textCanvas = document.createElement('canvas');
+		const textCtx = textCanvas.getContext('2d');
+		textCanvas.width = boxW; textCanvas.height = boxH;
+		textCtx.font = '30px FNF';
+		textCtx.textBaseline = 'top';
+		textCtx.shadowColor = "black";
+		textCtx.shadowBlur = 10;
+
+		let chatHeights = [];
+		for (let i = 0; i < chatData.length; i ++) {
+			const [name, color, content] = chatData[i];
+			const nameText  = `${name}: `, nameWidth = textCtx.measureText(nameText).width;
+			
+			let words = content.split(' ');
+			let line = '';
+			let firstLine = true;
+			let linesCount = 0;
+
+			for (let w = 0; w < words.length; w++) {
+				const testLine = line + words[w] + ' ';
+				const testWidth = textCtx.measureText(testLine).width;
+				const currentMax = firstLine ? (maxWidth - nameWidth) : maxWidth;
+				if (testWidth > currentMax && line !== '') {
+					linesCount++;
+					line = words[w] + ' ';
+					firstLine = false;
+				} else {
+					line = testLine;
+				}
+			}
+
+			linesCount++;
+			chatHeights[i] = linesCount * lineHeight;
+			totalHeight += linesCount * lineHeight;
+		}
+
+		chatHeights.forEach((h, i) => { // side thing to make it smooth and awesome and SEXY
+			lerpingChatHeights[i] = lerpingChatHeights[i] === undefined ? 0 : lerpingChatHeights[i] + (h - lerpingChatHeights[i]) * 0.1;
+		});
+
+		// text chat (killing someong, part 2)
+
+		let y = boxH - 25;
+		for (let i = chatData.length - 1; i >= 0; i--) {
+			const [name, color, content] = chatData[i];
+			textCtx.fillStyle = color;
+			const nameText = `${name}: `, nameWidth = textCtx.measureText(nameText).width;
+			textCtx.fillText(nameText, 22, y - lerpingChatHeights[i]);
+			textCtx.fillStyle = 'white';
+
+			let words = content.split(' ');
+			let line = '';
+			let firstLine = true;
+			let lineYBase = y - lerpingChatHeights[i];
+			let drawLines = [];
+			
+			for (let w = 0; w < words.length; w++) {
+				const testLine = line + words[w] + ' ';
+				const testWidth = textCtx.measureText(testLine).width;
+				const currentMax = firstLine ? (maxWidth - nameWidth) : maxWidth;
+				if (testWidth > currentMax && line !== '') {
+					drawLines.push(line.trim());
+					line = words[w] + ' ';
+					firstLine = false;
+				} else {
+					line = testLine;
+				}
+			}
+
+			drawLines.push(line.trim());
+			drawLines.forEach((ln, idx) => {
+				const drawX = idx === 0 ? (22 + nameWidth) : 22;
+				textCtx.fillText(ln, drawX, lineYBase + idx * lineHeight);
+			});
+			y -= lerpingChatHeights[i];
+		}
+
+		// mask text to box
+
+		const maskCanvas2 = document.createElement('canvas');
+		const maskCtx2 = maskCanvas2.getContext('2d');
+		maskCanvas2.width  = boxW, maskCanvas2.height = boxH;
+		maskCtx2.drawImage(maskImage, 0, 0, boxW, boxH);
+		const textData = textCtx.getImageData(0, 0, boxW, boxH);
+		const maskData2 = maskCtx2.getImageData(0, 0, boxW, boxH);
+		// once again would be awesome if this was like a function so i can not have to do all this shit
+		for (let i = 0; i < textData.data.length; i += 4) textData.data[i + 3] = textData.data[i + 3] * (maskData2.data[i + 3] / 255);
+		textCtx.putImageData(textData, 0, 0);
+		ctx.drawImage(textCanvas, boxX, boxY);
+	}
+
+	// stolen utils SORRY I FORGOT WHERE I GOT THEM FROME
+	function hexToHSL(hex) {
+	    hex = hex.replace(/^#/, '');
+	    if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+	    const num = parseInt(hex, 16);
+	    let r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
+	    r /= 255; g /= 255; b /= 255;
+	    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+	    let h, s, l = (max + min) / 2;
+	    if (max === min) {
+	        h = s = 0;
+	    } else {
+	        const d = max - min;
+	        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+	        switch (max) {
+	            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+	            case g: h = (b - r) / d + 2; break;
+	            case b: h = (r - g) / d + 4; break;
+	        }
+	        h /= 6;
+	    }
+	    return { h: h * 360, s: s * 100, l: l * 100 };
+	}
+
+	function hslToHex(h, s, l) {
+	    h /= 360; s /= 100; l /= 100;
+	    let r, g, b;
+	    if (s === 0) {
+	        r = g = b = l;
+	    } else {
+	        const hue2rgb = (p, q, t) => {
+	            if (t < 0) t += 1;
+	            if (t > 1) t -= 1;
+	            if (t < 1/6) return p + (q - p) * 6 * t;
+	            if (t < 1/2) return q;
+	            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+	            return p;
+	        };
+	        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+	        const p = 2 * l - q;
+	        r = hue2rgb(p, q, h + 1/3);
+	        g = hue2rgb(p, q, h);
+	        b = hue2rgb(p, q, h - 1/3);
+	    }
+	    const toHex = x => {
+	        const hex = Math.round(x * 255).toString(16);
+	        return hex.length === 1 ? '0' + hex : hex;
+	    };
+	    return '#' + toHex(r) + toHex(g) + toHex(b);
+	}
+
+	function darken(hex, percent) { // all this is is if i put in "20" it's 20% darker lol
+	    let hsl = hexToHSL(hex);
+	    hsl.l = Math.max(0, hsl.l - percent);
+	    return hslToHex(hsl.h, hsl.s, hsl.l);
+	}
+
+	let notes = [];
+	function drawNotes(notesCtx, boxX, boxY, boxW, boxH) {
+		const nS = 0.7;
+		const w = noteIntImage.width, h = noteIntImage.height;
+		for (const n of notes) {
+			const drawX = boxX + (boxW / 2) + n.x - (w * nS / 2), drawY = boxY - n.y;
+			const drawW = w * nS, drawH = h * nS;
+
+			// interior
+			const noteCanvas = document.createElement('canvas');
+			const noteCtx = noteCanvas.getContext('2d');
+			noteCanvas.width = drawW; noteCanvas.height = drawH;
+			noteCtx.drawImage(noteIntImage, 0, 0, w, h, 0, 0, drawW, drawH);
+
+			// color (given)
+			noteCtx.globalCompositeOperation = "source-in";
+			noteCtx.fillStyle = n.color;
+			noteCtx.fillRect(0, 0, drawW, drawH);
+			noteCtx.globalCompositeOperation = "source-over";
+			notesCtx.drawImage(noteCanvas, drawX, drawY);
+			
+			// shade
+			const shadeCanvas = document.createElement('canvas');
+			const shadeCtx = shadeCanvas.getContext('2d');
+			shadeCanvas.width = drawW; shadeCanvas.height = drawH;
+			shadeCtx.drawImage(noteShadImage, 0, 0, w, h, 0, 0, drawW, drawH);
+
+			// color white
+			shadeCtx.globalCompositeOperation = "source-in";
+			shadeCtx.fillStyle = '#ffffff';
+			shadeCtx.fillRect(0, 0, drawW, drawH);
+			shadeCtx.globalCompositeOperation = "source-over";
+			notesCtx.drawImage(shadeCanvas, drawX, drawY);
+
+			// exterior
+			const outlineCanvas = document.createElement('canvas');
+			const outlineCtx = outlineCanvas.getContext('2d');
+			outlineCanvas.width = drawW; outlineCanvas.height = drawH;
+			outlineCtx.drawImage(noteExtImage, 0, 0, w, h, 0, 0, drawW, drawH);
+
+			// color (given + darken a bit)
+			outlineCtx.globalCompositeOperation = "source-in";
+			outlineCtx.fillStyle = darken(n.color, 35);
+			outlineCtx.fillRect(0, 0, drawW, drawH);
+			outlineCtx.globalCompositeOperation = "source-over";
+			notesCtx.drawImage(outlineCanvas, drawX, drawY);
+		}
+
+		for (const n of notes.slice()) { // fun fact! do .slice() and it copies it so its safe :)
+			n.y -= 20;
+			if (n.y < -10) {
+				chatData.push([n.user, n.color, n.message]);
+				notes.splice(notes.indexOf(n), 1);
+			}
+		}
+	}
+
+	ComfyJS.onChat = (user, message, flags, self, extra) => {
+		notes.push({
+			x: Math.random() * (130 * 2) - 130, y: 400,
+			user: user, color: extra.userColor, message: message});
+	};
+	ComfyJS.Init("wizardmantis");
+
+	notes.push({x: 0, y: 400, user: "loaded", color: '#c24b99', message: "chat!"});
+
+	if (1 === 2) {
+		// awesome debug mode: spam chat with sick fucking notes
+
+		let names = ['john', 'whitty', 'mark', 'eduardo', 'sarvente', 'my_butt', 'poopman', 'thelegend27', 'anon', 'mhm', 'theunamed', 'gurt', 'yogurt', 'strippedclub', 'carKeyz', 'EpicDude', 'LuisCoolFan', 'Wizard', 'Codist', 'Eric', 'Nix', 'Squishy', 'JC', 'KR', 'Penkaru', 'Tricky', 'Data5', 'feelDance'];
+		let messages = ['hello guys', 'wow this stream is okay', 'bro who gaf', 'ok', 'YEESH', 'im tired', 'dabs on the haters', 'who are these people', 'unfair bro', 'yeah L', 'awesome sauce!', 'awesome', 'do you wanna', 'build a snowman', 'splash text!', 'running out', 'no idea man', 'i love this game', 'what game is this', 'idk this game'];
+		let colors = ['#00ffff', '#c24b99', '#f9393f', '#12fa05'];
+
+		setInterval(() => {
+			notes.push({
+				x: Math.random() * (130 * 2) - 130, y: 400,
+				user: names[Math.floor(Math.random() * names.length)],
+				color: colors[Math.floor(Math.random() * colors.length)],
+				message: messages[Math.floor(Math.random() * messages.length)]
+			});
+		}, 150);
+	}
+
+	setInterval(update, 1);
+	// requestAnimationFrame(update);
+</script>
+</html>
