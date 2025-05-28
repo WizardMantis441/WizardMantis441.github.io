@@ -5,176 +5,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Funkin' Utils</title>
 </head>
-</html>
 <body>
-    <div class="main-content">
-        <div id="links">
-            <h2>Links</h2>
-            <nav>
-                <a href="https://ninja-muffin24.itch.io/funkin" class="site-link">Itch</a>
-                <a href="https://kawaisprite.bandcamp.com" class="site-link">Bandcamp</a>
-                <a href="https://github.com/FunkinCrew/funkin" class="site-link">GitHub</a>
-                <a href="https://funkincrew.github.io/funkin-modding-docs" class="site-link">Wiki</a>
-                <a href="https://www.newgrounds.com/portal/view/770371" class="site-link">Newgrounds</a>
-                <a href="https://funkin.me" class="site-link">Blog</a>
-                <a href="https://www.kickstarter.com/projects/funkin/friday-night-funkin-the-full-ass-game" class="site-link">Kickstarter</a>
-                <a href="https://gamebanana.com/games/8694" class="site-link">GameBanana</a>
-                <a href="https://gamejolt.com/games/tag-fnf" class="site-link">GameJolt</a>
-            </nav>
-			<img width="100" height="100" src="icon.png"/>
-        </div>
-
-        <div id="utilities">
-            <h1>Funkin' Utils</h1>
-            <section>
-                <nav id="art">
-                    <a href="editors/animation-editor.html" class="utility-link">Animation Editor</a>
-                </nav>
-            </section>
-        </div>
+    <img id="bg" src="assets/main/ui/bg-spray.PNG"/>
+    <img id="ui" src="assets/main/ui/ui.PNG"/>
+    <div class="scene"> <!-- but what is a scene? luckily we hired simpleflips to explain exactly what an uncleared div is-->
+        <!-- yeaaa so basically for perspective you gotta do that-->
+         <!-- that was our field reporter Jason the reporter, thanks json-->
+      <div id="menu">
+        <div class="menu-item"><img src="assets/main/ui/icon.PNG" alt="Icon 1"></div>
+        <div class="menu-item"><img src="assets/main/ui/icon.PNG" alt="Icon 2"></div>
+        <div class="menu-item"><img src="assets/main/ui/icon.PNG" alt="Icon 3"></div>
+        <div class="menu-item"><img src="assets/main/ui/icon.PNG" alt="Icon 4"></div>
+        <div class="menu-item"><img src="assets/main/ui/icon.PNG" alt="Icon 5"></div>
+        <div class="menu-item"><img src="assets/main/ui/icon.PNG" alt="Icon 6"></div>
+        <div class="menu-item"><img src="assets/main/ui/icon.PNG" alt="Icon 6"></div>
+        <div class="menu-item"><img src="assets/main/ui/icon.PNG" alt="Icon 6"></div>
+        <div class="menu-item"><img src="assets/main/ui/icon.PNG" alt="Icon 6"></div>
+        <div class="menu-item"><img src="assets/main/ui/icon.PNG" alt="Icon 6"></div>
+      </div>
     </div>
 
-    <footer>
-        &copy; 2025 Funkin' Utils. All rights up my Butt #trolled.
-    </footer>
+    <img id="bg-char" src="assets/main/ui/bg-right.PNG"/>
+    <img id="char" src="assets/main/chars/bf/code.png"/>
+
+    <h1>WEBSITE UNDER CONSTRUCTION</h1>
 </body>
 <style>
-	* {
-		margin: 0;
-		padding: 0;
-		box-sizing: border-box;
-	}
+    body {
+        margin: 0; padding: 0;
+        width: 100vw; height: 100vh;
+        background-color: #16441c;
+        display: flex; justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
 
-	@font-face {
-		font-family: 'FNF';
-		src: url('fnf.ttf') format('truetype');
-	}
+    h1 {
+        color: #fff;
+        font-size: 6rem;
+        text-align: center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        mix-blend-mode: difference; /* okay wait bc blend modes are fucking awesome. */
+        font-family: 'JetBrains Mono', monospace;
+    }
 
-	body {
-		font-family: 'FNF', cursive, sans-serif;
-		background: url('assets/background.png') no-repeat center center fixed;
-		background-size: cover;
-		color: #fff;
-		line-height: 1.6;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-	}
+    #bg {
+        position: absolute;
+        height: 100vh;
+        left: 0;
+    }
 
-	#links {
-		width: 30%;
-		background-color: rgba(0, 0, 0, 0.8);
-		padding: 20px;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-evenly;
-		align-items: center;
-		gap: 15px;
-		white-space: nowrap;
-		overflow-y: auto;
-		height: calc(100vh - 2rem)
-	}
+    #bg-char {
+        position: absolute;
+        height: 110vh;
+        right: -5rem;
+        top: -5rem;
+    }
 
-	#links a {
-		display: block;
-		padding: 10px;
-		font-size: 1.69rem;
-		color: #fff;
-		text-decoration: none;
-		background: linear-gradient(135deg, #1975ff, #002ca7);
-		border: 2px solid #000;
-		border-radius: 10px;
-		text-shadow: 2px 2px 0 #000;
-		transition: transform 0.1s ease, box-shadow 0.1s ease;
-	}
+    #ui {
+        position: absolute;
+        top: -0.0075rem;
+        left: 0;
+    }
 
-	#links a:hover {
-		transform: scale(1.05);
-		box-shadow: 0 0 15px #ffffff07;
-	}
+    #ui {
+        position: absolute;
+        height: 100vh;
+        left: 0;
+    }
 
-	#links nav {
-		padding-top: 50px;
-		padding-bottom: 50px;
-	}
+    #char {
+        position: absolute;
+        height: 80vh;
+        right: 5rem;
+        bottom: -5rem;
+    }
+    
+    .scene {
+      /* width: 600px; */
+      /* height: 400px; */
+      /* margin: 50px auto;AHSDJKASDBNASD I DKKKKK */
+      /* margin: 0; padding: 0; */
+      perspective: 800px;
+      position: absolute;
+      left: 17.5%;
+      top: 37.5%;
+    }
 
-	#utilities {
-		flex-grow: 1;
-		padding: 20px;
-		background-color: rgba(0, 0, 0, 0.5);
-		white-space: nowrap;
-		overflow-y: auto;
-		height: calc(100vh - 2rem)
-	}
+    #menu {
+      /* width: 100%; height: 100%; */
+      /* position: absolute; */
+      transform-style: preserve-3d;
+    }
 
-	h1 {
-		text-align: center;
-		font-size: 5rem;
-		margin: 20px 0;
-		color: #ffcc00;
-		text-shadow: 3px 3px 0 #000;
-	}
+    .menu-item {
+      position: absolute;
+      top: 35%; left: 17.5%;
+      transform-origin: center center;
+      width: 128px; height: 128px;
+      margin: -32px;
+    }
 
-	h2 {
-		font-size: 3rem;
-		align-self: center;
-	}
-
-	section {
-		margin: 20px;
-		padding: 20px;
-		border: 3px solid #000;
-		border-radius: 10px;
-		background-color: #ffffff21;
-	}
-
-	section h2 {
-		margin-bottom: 15px;
-		color: #ffcc00;
-		text-shadow: 2px 2px 0 #000;
-	}
-
-	nav {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
-		gap: 15px;
-	}
-
-	.utility-link {
-		display: inline-block;
-		padding: 15px 25px;
-		font-size: 2rem;
-		color: #fff;
-		text-decoration: none;
-		background: linear-gradient(135deg, #ff0066, #6600ff);
-		border: 2px solid #000;
-		border-radius: 10px;
-		text-shadow: 2px 2px 0 #000;
-		transition: transform 0.1s ease, box-shadow 0.1s ease;
-	}
-
-	.utility-link:hover {
-		transform: scale(1.05);
-		box-shadow: 0 0 15px #ffffff07;
-	}
-
-	footer {
-		text-align: center;
-		/* margin: 20px 0; */
-		height: 2rem;
-		font-size: 1rem;
-		font-family: 'JetBrains Mono', monospace;
-		color: #ffcc00;
-		background-color: #000;
-		text-shadow: 1px 1px 0 #000;
-		align-self: stretch;
-	}
-
-	.main-content {
-		display: flex;
-		flex: 1;
-	}
+    .menu-item img {
+      display: block;
+      width: 100%; height: 100%; /* this is realy funny to turn off */
+      object-fit: contain;
+    }
 </style>
+  <script>
+    const items = document.querySelectorAll('.menu-item');
+    const radius = 400;
+    const count = items.length;
+
+    function updateMenu(rotationY = 0) {
+      items.forEach((item, i) => {
+        const angle = (i / count) * Math.PI * 2 + rotationY;
+        item.style.transform = `
+          rotateY(${angle}rad)
+          translateZ(${radius}px)
+          rotateY(${Math.PI}rad)
+          scaleX(-1)
+        `;
+
+        // I MIGHT KILL MYSELF. THANK FUCK I PAID ATTENTION IN CLASS
+        item.style.opacity = (!(angle % (Math.PI * 2) > Math.PI / 2 && angle % (Math.PI * 2) < Math.PI * 3 / 2)) ? 1 - Math.abs(Math.sin(angle)) : 0;
+      });
+    }
+
+    let rot = 0;
+    function animate() {
+      rot += 0.01;
+      updateMenu(rot);
+      requestAnimationFrame(animate); // i think this is the same as setInterval
+    }
+    animate();
+  </script>
+</html>

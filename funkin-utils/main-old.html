@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funkin' Utils</title>
+</head>
+</html>
+<body>
+    <div class="main-content">
+        <div id="links">
+            <h2>Links</h2>
+            <nav>
+                <a href="https://ninja-muffin24.itch.io/funkin" class="site-link">Itch</a>
+                <a href="https://kawaisprite.bandcamp.com" class="site-link">Bandcamp</a>
+                <a href="https://github.com/FunkinCrew/funkin" class="site-link">GitHub</a>
+                <a href="https://funkincrew.github.io/funkin-modding-docs" class="site-link">Wiki</a>
+                <a href="https://www.newgrounds.com/portal/view/770371" class="site-link">Newgrounds</a>
+                <a href="https://funkin.me" class="site-link">Blog</a>
+                <a href="https://www.kickstarter.com/projects/funkin/friday-night-funkin-the-full-ass-game" class="site-link">Kickstarter</a>
+                <a href="https://gamebanana.com/games/8694" class="site-link">GameBanana</a>
+                <a href="https://gamejolt.com/games/tag-fnf" class="site-link">GameJolt</a>
+            </nav>
+			<img width="100" height="100" src="icon.png"/>
+        </div>
+
+        <div id="utilities">
+            <h1>Funkin' Utils</h1>
+            <section>
+                <nav id="art">
+                    <a href="editors/animation-editor.html" class="utility-link">Animation Editor</a>
+                </nav>
+            </section>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 Funkin' Utils. All rights up my Butt #trolled.
+    </footer>
+</body>
+<style>
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	@font-face {
+		font-family: 'FNF';
+		src: url('fnf.ttf') format('truetype');
+	}
+
+	body {
+		font-family: 'FNF', cursive, sans-serif;
+		background: url('assets/background.png') no-repeat center center fixed;
+		background-size: cover;
+		color: #fff;
+		line-height: 1.6;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+	}
+
+	#links {
+		width: 30%;
+		background-color: rgba(0, 0, 0, 0.8);
+		padding: 20px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-evenly;
+		align-items: center;
+		gap: 15px;
+		white-space: nowrap;
+		overflow-y: auto;
+		height: calc(100vh - 2rem)
+	}
+
+	#links a {
+		display: block;
+		padding: 10px;
+		font-size: 1.69rem;
+		color: #fff;
+		text-decoration: none;
+		background: linear-gradient(135deg, #1975ff, #002ca7);
+		border: 2px solid #000;
+		border-radius: 10px;
+		text-shadow: 2px 2px 0 #000;
+		transition: transform 0.1s ease, box-shadow 0.1s ease;
+	}
+
+	#links a:hover {
+		transform: scale(1.05);
+		box-shadow: 0 0 15px #ffffff07;
+	}
+
+	#links nav {
+		padding-top: 50px;
+		padding-bottom: 50px;
+	}
+
+	#utilities {
+		flex-grow: 1;
+		padding: 20px;
+		background-color: rgba(0, 0, 0, 0.5);
+		white-space: nowrap;
+		overflow-y: auto;
+		height: calc(100vh - 2rem)
+	}
+
+	h1 {
+		text-align: center;
+		font-size: 5rem;
+		margin: 20px 0;
+		color: #ffcc00;
+		text-shadow: 3px 3px 0 #000;
+	}
+
+	h2 {
+		font-size: 3rem;
+		align-self: center;
+	}
+
+	section {
+		margin: 20px;
+		padding: 20px;
+		border: 3px solid #000;
+		border-radius: 10px;
+		background-color: #ffffff21;
+	}
+
+	section h2 {
+		margin-bottom: 15px;
+		color: #ffcc00;
+		text-shadow: 2px 2px 0 #000;
+	}
+
+	nav {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 15px;
+	}
+
+	.utility-link {
+		display: inline-block;
+		padding: 15px 25px;
+		font-size: 2rem;
+		color: #fff;
+		text-decoration: none;
+		background: linear-gradient(135deg, #ff0066, #6600ff);
+		border: 2px solid #000;
+		border-radius: 10px;
+		text-shadow: 2px 2px 0 #000;
+		transition: transform 0.1s ease, box-shadow 0.1s ease;
+	}
+
+	.utility-link:hover {
+		transform: scale(1.05);
+		box-shadow: 0 0 15px #ffffff07;
+	}
+
+	footer {
+		text-align: center;
+		/* margin: 20px 0; */
+		height: 2rem;
+		font-size: 1rem;
+		font-family: 'JetBrains Mono', monospace;
+		color: #ffcc00;
+		background-color: #000;
+		text-shadow: 1px 1px 0 #000;
+		align-self: stretch;
+	}
+
+	.main-content {
+		display: flex;
+		flex: 1;
+	}
+</style>

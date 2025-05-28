@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sick ass rotation idea</title>
+  <style>
+    .scene {
+      width: 600px;
+      height: 400px;
+      margin: 50px auto;
+      perspective: 800px;
+      position: relative;
+    }
+
+    #menu {
+      width: 100%; height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    .menu-item {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform-origin: center center;
+      width: 64px; height: 64px;
+      margin: -32px;
+    }
+
+    .menu-item img {
+      display: block;
+      width: 100%; height: 100%; /*this is realy funny to turn off*/
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div id="menu">
+      <div class="menu-item"><img src="cooldude.png" alt="Icon 1"></div>
+      <div class="menu-item"><img src="cooldude.png" alt="Icon 2"></div>
+      <div class="menu-item"><img src="cooldude.png" alt="Icon 3"></div>
+      <div class="menu-item"><img src="cooldude.png" alt="Icon 4"></div>
+      <div class="menu-item"><img src="cooldude.png" alt="Icon 5"></div>
+      <div class="menu-item"><img src="cooldude.png" alt="Icon 6"></div>
+    </div>
+  </div>
+
+  <script>
+    const items = document.querySelectorAll('.menu-item');
+    const radius = 150;
+    const count = items.length;
+
+    function updateMenu(rotationY = 0) {
+      items.forEach((item, i) => {
+        const angle = (i / count) * Math.PI * 2 + rotationY;
+        item.style.transform = `
+          rotateY(${angle}rad)
+          translateZ(${radius}px)
+          rotateY(${Math.PI}rad)
+        `;
+
+        if (!(angle % (Math.PI * 2) > Math.PI / 2 && angle % (Math.PI * 2) < Math.PI * 3 / 2)) {
+          item.style.opacity = 0.5; // blehhh cuold be terenary
+        } else {
+          item.style.opacity = 1;
+        }
+      });
+    }
+
+    let rot = 0;
+    function animate() {
+      rot += 0.02;
+      updateMenu(rot);
+      requestAnimationFrame(animate); // i think this is the same as setInterval
+    }
+    animate();
+  </script>
+</body>
+</html>

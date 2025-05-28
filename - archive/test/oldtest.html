@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- Add three.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+</head>
+<body>
+    <div id="container"></div>
+<script>
+    // Scene setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('container').appendChild(renderer.domElement);
+
+    // Load texture
+    const texture = new THREE.TextureLoader().load('cooldude.png');
+    const geometry = new THREE.PlaneGeometry(4, 4 * (texture.image ? texture.image.height / texture.image.width : 1));
+    const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+    const plane = new THREE.Mesh(geometry, material);
+    scene.add(plane);
+
+    camera.position.z = 8;
+
+    function animate() {
+        requestAnimationFrame(animate);
+        // Spin the plane around Y axis
+        plane.rotation.y = Math.sin(Date.now() * 0.001) * Math.PI / 3;
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // Responsive resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+</body>
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+    }
+</style>
+</html>
