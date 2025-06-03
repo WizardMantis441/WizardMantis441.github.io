@@ -324,7 +324,7 @@
 	function updatePackButtonState() {
 		packBtn.disabled = !(pngFile && xmlFile);
 		downloadZipLink.classList.add("disabled"); // doing both idk if that does anything
-		// downloadZipLink.style.display = "none";
+		downloadZipLink.style.display = "none";
 		statusMsgEl.textContent = "";
 	}
 
@@ -509,6 +509,7 @@
 		downloadZipLink.href = zipURL;
 		downloadZipLink.download = zipFilename;
 		downloadZipLink.classList.remove("disabled");
+		downloadZipLink.style.display = "inline-block"; // WHYY
 		downloadZipLink.textContent = `Download ${zipFilename}`;
 	}
 </script>
