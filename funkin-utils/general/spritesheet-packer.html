@@ -330,7 +330,7 @@
 
 	packBtn.addEventListener("click", () => {
 		if (!pngFile || !xmlFile) return;
-		statusMsgEl.textContent = "Reading files…";
+		statusMsgEl.textContent = "Reading files..."; //tried being special :(
 		readFilesAndPack(pngFile, xmlFile);
 	});
 
@@ -492,19 +492,20 @@
 		packedImgURL, packedWidth, packedHeight, packedFileSize,
 		zipURL, zipFilename
 	}) {
-		function b2MB(bytes) {
-			// that weird number? 1024 * 1024. yeah, i bet u feel Real stupid huh?
-			return (bytes / (1048576)).toFixed(2) + ' MB';
+		function inGameMemory(width, height) {
+			// THANK YOU DATA! THIS IS DATA's IDEA!
+			return (width * height * 4 / 1024 / 1024).toFixed(2);
 		}
-
-		// shout out my physics class for calculating percent error the theory helped ish
-		const saved = (1 - (packedWidth * packedHeight) / (originalWidth * originalHeight)) * 100;
 
 		beforeImgEl.src = originalImgURL;
 		afterImgEl.src = packedImgURL;
 
-		beforeInfoEl.textContent = `${b2MB(originalFileSize)}, ${originalWidth}x${originalHeight}`;
-		afterInfoEl.textContent = `${b2MB(packedFileSize)}, ${packedWidth}x${packedHeight} (${saved.toFixed(2)}% ${saved > 0 ? "saved! :D" : "lost ;( sorry"})`;
+		let ogMem = inGameMemory(originalWidth, originalHeight);
+		let packMem = inGameMemory(packedWidth, packedHeight);
+		let saved = ogMem - packMem;
+
+		beforeInfoEl.textContent = `${ogMem}MB - ${originalWidth}x${originalHeight}`;
+		afterInfoEl.textContent = `${packMem}MB - ${packedWidth}x${packedHeight} // ${Math.abs(saved)}MB ${saved > 0 ? "saved! :D" : "lost ;( sorry"}`;
 
 		downloadZipLink.href = zipURL;
 		downloadZipLink.download = zipFilename;
