@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Spritesheet Packer</title>
+</head>
+<body>
+	<div class="container">
+		<div class="sidebar">
+			<div class="top-controls">
+				<h1>Spritesheet Packer</h1>
+				<h6>Made to reduce RAM in FNF mods by cutting out unnecessary transparent space! i love fnf this is awesome it was a python script before but i made it a website so that everyone can use it at anytime i might update it more so that you can do entire folders or something but i am making this kinda on a whim</h6>
+
+				<label for="pngInput">Choose PNG:</label>
+				<input type="file" id="pngInput" accept=".png"/>
+
+				<label for="xmlInput">Choose XML:</label>
+				<input type="file" id="xmlInput" accept=".xml"/>
+
+				<br><br>
+
+				<button id="packBtn" disabled>Pack Spritesheet</button>
+
+				<!-- i made it a link so its like a button but a hightliI DONT KNOWWW IM TIREDDD-->
+				<a id="downloadZipLink" class="button-link disabled" style="display: none;">Download ZIP</a>
+			</div>
+
+			<!-- i want it centered get outcased loser div L div-->
+			<div id="statusMsg" class="status-msg"></div>
+		</div>
+
+		<div class="main">
+			<div class="results-container" id="resultsContainer">
+				<div id="beforeSection" class="section">
+					<h2>Before</h2>
+					<div class="image-container">
+						<img id="beforeImg" src="" alt="Before spritesheet"/>
+					</div>
+					<div id="beforeInfo" class="info-line"></div>
+				</div>
+				<div id="afterSection" class="section">
+					<h2>After</h2>
+					<div class="image-container">
+						<img id="afterImg" src="" alt="After spritesheet"/>
+					</div>
+					<div id="afterInfo" class="info-line"></div>
+				</div>
+			</div>
+		</div>
+  	</div>
+</body>
+<style>
+	* { box-sizing: border-box; } /* no idea but it fixes things */
+
+	body {
+		margin: 0; padding: 0;
+		font-family: 'JetBrains Mono', monospace;
+		background-color: #2c2c2c; color: rgb(255, 255, 255);
+		height: 100vh;
+		overflow: hidden;
+	}
+
+	a {
+		color: #2c2c2c;
+		text-decoration: none;
+	}
+	a:hover { text-decoration: underline; }
+
+	/* SICK FUCKING BUTTON. YES BRO. BROOO THIS IS SICK IM SICK WITH . IT. */
+	.button-link {
+		display: inline-block;
+		font-family: inherit;
+		font-size: 0.9rem;
+		padding: 0.5rem 1rem;
+		border: none;
+		border-radius: 4px;
+		background-color: #4fc3f7;
+		color: #2c2c2c;
+		text-align: center;
+		text-decoration: none;
+		margin-top: 0.5rem;
+		cursor: pointer;
+	}
+	.button-link:disabled, .button-link.disabled {
+		background-color: #aaaaaa;
+		cursor: not-allowed;
+	}
+
+	button {
+		cursor: pointer;
+		font-family: inherit;
+		font-size: 0.9rem;
+		padding: 0.5rem 1rem;
+		border: none;
+		border-radius: 4px;
+		background-color: #4fc3f7;
+		color: #2c2c2c;
+		margin-top: 0.5rem;
+	}
+	button:disabled {
+		background-color: #aaaaaa;
+		cursor: not-allowed;
+	}
+
+	h1 {
+		margin: 0;
+		font-size: 1.5rem;
+		color: #ffffff;
+	}
+	h6 {
+		margin: 0.25rem 0 1rem 0;
+		font-size: 0.8rem;
+		color: #bbbbbb;
+	}
+
+	.container {
+		display: flex;
+		height: 100vh;
+		width: 100vw;
+		overflow: hidden;
+	}
+
+	.sidebar {
+		background-color: #212121;
+		width: 20rem;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: 1rem;
+	}
+
+	.top-controls {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.top-controls label {
+		margin-top: 1rem;
+		font-size: 0.9rem;
+	}
+	.top-controls input[type="file"] {
+		margin-top: 0.5rem;
+		color: #ffffff;
+	}
+
+	.status-msg {
+		text-align: center;
+		font-size: 0.9rem;
+		color: #dddddd;
+		margin-bottom: 1rem;
+	}
+
+	/* not the actual html main thing but idkk i might be domb */
+	.main {
+		background-color: #151515;
+		flex: 1;
+		display: flex;
+		justify-content: center;
+		align-items: stretch;
+		padding: 1rem;
+		height: 100%;
+		overflow: hidden;
+	}
+
+	.results-container {
+		width: 100%; height: 100%;
+		display: flex; gap: 1rem;
+		justify-content: center;
+		align-items: stretch;
+	}
+
+	.section {
+		background-color: #333333;
+		border-radius: 6px;
+		padding: 0.5rem;
+		width: 50%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.section h2 {
+		margin: 0; /* yurr im actually so freakin smart and ahead of the game and awesome did i mention my pizzaz*/
+	}
+
+	.image-container {
+		border: 2px solid #555555;
+		border-radius: 5px;
+		width: 100%;
+		flex: 1; /* so at first i thought it was space-between or whatever but no thanks*/
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background-color: #212121;
+		overflow: hidden;
+	}
+	.image-container img {
+		max-width: 100%; max-height: 100%;
+		object-fit: contain; /*mmph mhm yESSSSS*/
+	}
+
+	img {
+		background-color: #666666;
+	}
+
+	.info-line {
+		margin-top: 0.5rem;
+		color: #bbbbbb;
+		font-size: 0.9rem;
+		text-align: center;
+	}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script> <!-- zip files woo -->
+<script>
+	// ported from python basically almost 1 to 1 LMAO
+	// unrelated but ohh my god theres so many functions in
+	// javascript that do such useful shit for oddly specific situations
+	// ive never read more about js in my life this was WORTH
+	// i still don't fully get .map or promises it kinda just is for async stuff oops
+	function getPlacementBlueprint(boxes) {
+		if (!boxes.length) return { width: 0, height: 0, placements: [] };
+
+		const sortedBoxes = boxes
+			.map((b, i) => [b[0], b[1], i])
+			.sort((a, b) => b[1] - a[1]);
+
+		function packHeight(sheetWidth) {
+			let curX = 0, curY = 0, shelfH = 0;
+			for (const [w, h] of sortedBoxes) {
+				if (curX + w <= sheetWidth) {
+					curX += w;
+					shelfH = Math.max(shelfH, h);
+				} else {
+					curY += shelfH;
+					curX = w;
+					shelfH = h;
+				}
+			}
+			return curY + shelfH;
+		}
+
+		function makeLayout(sheetWidth) {
+			const placements = [];
+			let curX = 0, curY = 0, shelfH = 0;
+			for (const [w, h, origIdx] of sortedBoxes) {
+				if (curX + w > sheetWidth) {
+					curY += shelfH;
+					curX = 0;
+					shelfH = 0;
+				}
+				placements.push([origIdx, curX, curY]);
+				curX += w;
+				shelfH = Math.max(shelfH, h);
+			}
+			const totalH = curY + shelfH;
+			return [totalH, placements];
+		}
+
+		const widths = boxes.map(b => b[0]);
+		let low = Math.max(...widths), high = widths.reduce((a, b) => a + b, 0);
+
+		let bestW = low;
+		let bestH = packHeight(low);
+		let bestArea = bestW * bestH;
+
+		while (high - low > 3) {
+			const m1 = low + Math.floor((high - low) / 3);
+			const m2 = high - Math.floor((high - low) / 3);
+			const a1 = m1 * packHeight(m1);
+			const a2 = m2 * packHeight(m2);
+			if (a1 < a2) {
+				high = m2 - 1;
+			} else {
+				low = m1 + 1;
+			}
+		}
+
+		for (let w = low; w <= high; w++) {
+			const h = packHeight(w);
+			const area = w * h;
+			if (area < bestArea) {
+				bestArea = area;
+				bestW = w;
+				bestH = h;
+			}
+		}
+
+		const [finalH, rawPlacements] = makeLayout(bestW);
+		const placements = Array(boxes.length);
+		for (const [origIdx, x, y] of rawPlacements) {
+			placements[origIdx] = { x, y };
+		}
+
+		return { width: bestW, height: finalH, placements };
+	}
+
+	// i saw a tutorial put El after each var so like u know what it is and i don't really like it but i mean it kinda makes sense
+	const pngInputEl = document.getElementById("pngInput");
+	const xmlInputEl = document.getElementById("xmlInput");
+	const packBtn = document.getElementById("packBtn");
+	const statusMsgEl = document.getElementById("statusMsg");
+	const downloadZipLink = document.getElementById("downloadZipLink");
+	const resultsContainer = document.getElementById("resultsContainer");
+	const beforeSection = document.getElementById("beforeSection");
+	const afterSection = document.getElementById("afterSection");
+	const beforeImgEl = document.getElementById("beforeImg");
+	const beforeInfoEl = document.getElementById("beforeInfo");
+	const afterImgEl = document.getElementById("afterImg");
+	const afterInfoEl = document.getElementById("afterInfo");
+
+	let pngFile = null;
+	let xmlFile = null;
+
+	pngInputEl.addEventListener("change", (e) => {
+		pngFile = e.target.files[0] || null;
+		updatePackButtonState();
+	});
+	xmlInputEl.addEventListener("change", (e) => {
+		xmlFile = e.target.files[0] || null;
+		updatePackButtonState();
+	});
+
+	function updatePackButtonState() {
+		packBtn.disabled = !(pngFile && xmlFile);
+		downloadZipLink.classList.add("disabled"); // doing both idk if that does anything
+		// downloadZipLink.style.display = "none";
+		statusMsgEl.textContent = "";
+	}
+
+	packBtn.addEventListener("click", () => {
+		if (!pngFile || !xmlFile) return;
+		statusMsgEl.textContent = "Reading files…";
+		readFilesAndPack(pngFile, xmlFile);
+	});
+
+	// i love async its so cool
+	async function readFilesAndPack(pngFile, xmlFile) {
+		try {
+			const pngDataURL = await fileToDataURL(pngFile);
+			const img = await dataURLToImage(pngDataURL);
+
+			const xmlText = await fileToText(xmlFile);
+			const xmlDoc = new DOMParser().parseFromString(xmlText, "application/xml");
+
+			const subTextures = Array.from(xmlDoc.getElementsByTagName("SubTexture"));
+			if (subTextures.length === 0) {
+				statusMsgEl.textContent = "ERROR: No <SubTexture> tags found in the XML."; // i tested with the alphabet this is mainly for that guy
+				return;
+			}
+
+			// sometimes frames are used multiple times, we only need unique ones
+			const uniqueMap = {}; // key -> index in uniqueKeys
+			const uniqueKeys = []; // array of [x, y, w, h]
+			const origToUnique = []; // indexes pointing bckwards
+
+			subTextures.forEach((sub, idx) => {
+				const x = parseInt(sub.getAttribute("x"), 10); // did u know you can specify the base of ints?? insane base 10 to base x converter lol
+				const y = parseInt(sub.getAttribute("y"), 10);
+				const w = parseInt(sub.getAttribute("width"), 10);
+				const h = parseInt(sub.getAttribute("height"), 10);
+				const key = `${x},${y},${w},${h}`;
+				if (!(key in uniqueMap)) {
+					uniqueMap[key] = uniqueKeys.length;
+					uniqueKeys.push([x, y, w, h]);
+				}
+				origToUnique.push(uniqueMap[key]);
+			});
+
+			const uniqueBoxes = uniqueKeys.map(([x, y, w, h]) => [w, h]);
+
+			statusMsgEl.textContent = "Computing optimal layout... bee boop boop bap i am a robot.";
+			const blueprint = getPlacementBlueprint(uniqueBoxes);
+			const newW = blueprint.width, newH = blueprint.height;
+
+			// offscreen canvas for cropping
+			const offCanvas = document.createElement("canvas");
+			offCanvas.width = img.width; offCanvas.height = img.height;
+			const offCtx = offCanvas.getContext("2d");
+			offCtx.drawImage(img, 0, 0);
+
+			// crop each frame and get the pixel data
+			const uniqueSprites = [];
+			for (const [x0, y0, w, h] of uniqueKeys) {
+				const frameData = offCtx.getImageData(x0, y0, w, h);
+				uniqueSprites.push({ w, h, data: frameData });
+			}
+
+			// new canvas for putting stuff back together
+			const packCanvas = document.createElement("canvas");
+			packCanvas.width = newW; packCanvas.height = newH;
+			const packCtx = packCanvas.getContext("2d");
+			packCtx.clearRect(0, 0, newW, newH); //b
+
+			// paste the data from the blueprint onto the new canvas and kill self with fire
+			blueprint.placements.forEach((pos, idx) => {
+				const { w, h, data } = uniqueSprites[idx]; // its like lua lol
+				const tempCanvas = document.createElement("canvas");
+				tempCanvas.width = w; tempCanvas.height = h;
+				tempCanvas.getContext("2d").putImageData(data, 0, 0);
+				packCtx.drawImage(tempCanvas, pos.x, pos.y);
+			});
+
+			// also update the xml to the new x and y shits that might be important
+			subTextures.forEach((sub, i) => {
+				const uniqIdx = origToUnique[i];
+				const { x, y } = blueprint.placements[uniqIdx];
+				sub.setAttribute("x", x.toString());
+				sub.setAttribute("y", y.toString());
+			});
+
+			// zip files need "blobs" to work ??? i dont know but okay
+			statusMsgEl.textContent = "Generating packed PNG & updated XML...";
+			const packedPngBlob = await new Promise(resolve => {
+				packCanvas.toBlob(blob => resolve(blob), "image/png");
+			});
+			const packedXmlString = new XMLSerializer().serializeToString(xmlDoc);
+			const packedXmlBlob = new Blob([packedXmlString], { type: "application/xml" });
+
+			// jszip my goat
+			statusMsgEl.textContent = "Zipping PNG & XML...";
+			const zip = new JSZip();
+			const baseName = pngFile.name.replace(/\.png$/i, ""); // i hate regex so this is stolen i dont care
+			zip.file(`${baseName}.png`, packedPngBlob);
+			zip.file(`${baseName}.xml`, packedXmlBlob);
+			const zipBlob = await zip.generateAsync({ type: "blob" });
+			const zipURL = URL.createObjectURL(zipBlob);
+			const zipFilename = `${baseName}.zip`;
+
+			// why is everything urls it doesn't make sense
+			const afterPngDataURL = await blobToDataURL(packedPngBlob);
+			showBeforeAfter({
+				originalImgURL: pngDataURL, // did you know? u can add what the thing is before it and it'll still parse it even tho this is basically an array i just think thats neat
+				originalWidth: img.width,
+				originalHeight: img.height,
+				originalFileSize: pngFile.size,
+				packedImgURL: afterPngDataURL,
+				packedWidth: newW,
+				packedHeight: newH,
+				packedFileSize: packedPngBlob.size,
+				zipURL,
+				zipFilename
+			});
+
+			statusMsgEl.textContent = "Done."; // GRAHHHHHHH GRHAHHHH ARRHHHHGGGGGHHH AHHHHH
+		} catch (err) {
+			console.error(err);
+			statusMsgEl.textContent = "ERROR: " + err.message;
+		}
+	}
+
+	// a lot of one off scenario things that all look the same but ima put them down here lolz
+
+	function fileToDataURL(file) { // for input png
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = () => resolve(reader.result);
+			reader.onerror = () => reject(reader.error);
+			reader.readAsDataURL(file);
+		});
+	}
+
+	function dataURLToImage(dataURL) { // for input png to actual image
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			img.onload = () => resolve(img);
+			img.onerror = () => reject(new Error("Failed to load image!!!"));
+			img.src = dataURL;
+		});
+	}
+
+	function fileToText(file) { // for input xml
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = () => resolve(reader.result);
+			reader.onerror = () => reject(reader.error);
+			reader.readAsText(file);
+		});
+	}
+
+	function blobToDataURL(blob) { // for before and after
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = () => resolve(reader.result);
+			reader.onerror = () => reject(reader.error);
+			reader.readAsDataURL(blob);
+		});
+	}
+
+	function showBeforeAfter({
+		originalImgURL, originalWidth, originalHeight, originalFileSize,
+		packedImgURL, packedWidth, packedHeight, packedFileSize,
+		zipURL, zipFilename
+	}) {
+		function b2MB(bytes) {
+			// that weird number? 1024 * 1024. yeah, i bet u feel Real stupid huh?
+			return (bytes / (1048576)).toFixed(2) + ' MB';
+		}
+
+		// shout out my physics class for calculating percent error the theory helped ish
+		const saved = (1 - (packedWidth * packedHeight) / (originalWidth * originalHeight)) * 100;
+
+		beforeImgEl.src = originalImgURL;
+		afterImgEl.src = packedImgURL;
+
+		beforeInfoEl.textContent = `${b2MB(originalFileSize)}, ${originalWidth}x${originalHeight}`;
+		afterInfoEl.textContent = `${b2MB(packedFileSize)}, ${packedWidth}x${packedHeight} (${saved.toFixed(2)}% ${saved > 0 ? "saved! :D" : "lost ;( sorry"})`;
+
+		downloadZipLink.href = zipURL;
+		downloadZipLink.download = zipFilename;
+		downloadZipLink.classList.remove("disabled");
+		downloadZipLink.textContent = `Download ${zipFilename}`;
+	}
+</script>
+</html>
