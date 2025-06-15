@@ -222,12 +222,17 @@
 		if (!boxes.length) return { width: 0, height: 0, placements: [] };
 
 		const sortedBoxes = boxes
-			.map((b, i) => [b[0], b[1], i])
+			.map((b, i) => [b[0], b[1], b[2], i])
 			.sort((a, b) => b[1] - a[1]);
 
 		function packHeight(sheetWidth) {
 			let curX = 0, curY = 0, shelfH = 0;
-			for (const [w, h] of sortedBoxes) {
+			for (let [w, h, rotated] of sortedBoxes) {
+				if (rotated) {
+					var oldW = w;
+					w = h;
+					h = oldW;
+				}
 				if (curX + w <= sheetWidth) {
 					curX += w;
 					shelfH = Math.max(shelfH, h);
@@ -243,7 +248,12 @@
 		function makeLayout(sheetWidth) {
 			const placements = [];
 			let curX = 0, curY = 0, shelfH = 0;
-			for (const [w, h, origIdx] of sortedBoxes) {
+			for (let [w, h, rotated, origIdx] of sortedBoxes) {
+				if (rotated) {
+					var oldW = w;
+					w = h;
+					h = oldW;
+				}
 				if (curX + w > sheetWidth) {
 					curY += shelfH;
 					curX = 0;
@@ -257,7 +267,7 @@
 			return [totalH, placements];
 		}
 
-		const widths = boxes.map(b => b[0]);
+		const widths = boxes.map(b => b[b[2] ? 1 : 0]); // if rotated then the width is the height :brain:
 		let low = Math.max(...widths), high = widths.reduce((a, b) => a + b, 0);
 
 		let bestW = low;
@@ -359,15 +369,16 @@
 				const y = parseInt(sub.getAttribute("y"), 10);
 				const w = parseInt(sub.getAttribute("width"), 10);
 				const h = parseInt(sub.getAttribute("height"), 10);
-				const key = `${x},${y},${w},${h}`;
+				const rotated = sub.hasAttribute("rotated") ? ((sub.getAttribute("rotated") ?? "false") == "true") : false; //defaults to false if no exist
+				const key = `${x},${y},${w},${h},${rotated}`;
 				if (!(key in uniqueMap)) {
 					uniqueMap[key] = uniqueKeys.length;
-					uniqueKeys.push([x, y, w, h]);
+					uniqueKeys.push([x, y, w, h, rotated]);
 				}
 				origToUnique.push(uniqueMap[key]);
 			});
 
-			const uniqueBoxes = uniqueKeys.map(([x, y, w, h]) => [w, h]);
+			const uniqueBoxes = uniqueKeys.map(([x, y, w, h, rotated]) => [w, h, rotated]);
 
 			statusMsgEl.textContent = "Computing optimal layout... bee boop boop bap i am a robot.";
 			const blueprint = getPlacementBlueprint(uniqueBoxes);
@@ -381,10 +392,22 @@
 
 			// crop each frame and get the pixel data
 			const uniqueSprites = [];
-			for (const [x0, y0, w, h] of uniqueKeys) {
+			for (let [x0, y0, w, h, rotated] of uniqueKeys) {
+
+				if (w <= 0 || h <= 0) {
+					console.warn('Invalid sprite size', w, h);
+					continue;
+				}
+
 				const frameData = offCtx.getImageData(x0, y0, w, h);
-				uniqueSprites.push({ w, h, data: frameData });
+
+				if (rotated) {
+					[w, h] = [h, w];
+				}
+
+				uniqueSprites.push({ w, h, data: frameData, rotated });
 			}
+
 
 			// new canvas for putting stuff back together
 			const packCanvas = document.createElement("canvas");
@@ -394,10 +417,35 @@
 
 			// paste the data from the blueprint onto the new canvas and kill self with fire
 			blueprint.placements.forEach((pos, idx) => {
-				const { w, h, data } = uniqueSprites[idx]; // its like lua lol
-				const tempCanvas = document.createElement("canvas");
-				tempCanvas.width = w; tempCanvas.height = h;
-				tempCanvas.getContext("2d").putImageData(data, 0, 0);
+				let { w, h, data, rotated } = uniqueSprites[idx];
+
+				// UNSWAP w/h if rotated, because data is still upright
+				const dataWidth = rotated ? h : w;
+				const dataHeight = rotated ? w : h;
+
+				const originalCanvas = document.createElement("canvas");
+				originalCanvas.width = dataWidth;
+				originalCanvas.height = dataHeight;
+				originalCanvas.getContext("2d").putImageData(data, 0, 0);
+
+				let tempCanvas, tempCtx;
+
+				if (rotated) {
+					// Width and height swapped for rotated canvas
+					tempCanvas = document.createElement("canvas");
+					tempCanvas.width = w;
+					tempCanvas.height = h;
+
+					tempCtx = tempCanvas.getContext("2d");
+					tempCtx.translate(0, h);
+					tempCtx.rotate(-Math.PI / 2);
+
+					tempCtx.drawImage(originalCanvas, 0, 0);
+				} else {
+					tempCanvas = originalCanvas;
+				}
+
+				// Draw the final result into the packed context
 				packCtx.drawImage(tempCanvas, pos.x, pos.y);
 			});
 
@@ -407,6 +455,8 @@
 				const { x, y } = blueprint.placements[uniqIdx];
 				sub.setAttribute("x", x.toString());
 				sub.setAttribute("y", y.toString());
+				if (sub.hasAttribute("rotated"))
+					sub.removeAttribute("rotated");
 			});
 
 			// zip files need "blobs" to work ??? i dont know but okay
@@ -504,8 +554,14 @@
 		let packMem = inGameMemory(packedWidth, packedHeight);
 		let saved = ogMem - packMem;
 
+		function roundTo(n, decimals)
+		{
+			var pow = Math.pow(10, decimals);
+			return Math.round(n * pow) / pow;
+		}
+
 		beforeInfoEl.textContent = `${ogMem}MB - ${originalWidth}x${originalHeight}`;
-		afterInfoEl.textContent = `${packMem}MB - ${packedWidth}x${packedHeight} // ${Math.abs(saved)}MB ${saved > 0 ? "saved! :D" : "lost ;( sorry"}`;
+		afterInfoEl.textContent = `${packMem}MB - ${packedWidth}x${packedHeight} // ~${roundTo(Math.abs(saved), 2)}MB ${saved > 0 ? "saved! :D" : "lost ;( sorry"}`;
 
 		downloadZipLink.href = zipURL;
 		downloadZipLink.download = zipFilename;
