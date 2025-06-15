@@ -369,7 +369,7 @@
 				const y = parseInt(sub.getAttribute("y"), 10);
 				const w = parseInt(sub.getAttribute("width"), 10);
 				const h = parseInt(sub.getAttribute("height"), 10);
-				const rotated = (sub.getAttribute("rotated") ?? "false") == "true";
+				const rotated = sub.hasAttribute("rotated") ? ((sub.getAttribute("rotated") ?? "false") == "true") : false; //defaults to false if no exist
 				const key = `${x},${y},${w},${h},${rotated}`;
 				if (!(key in uniqueMap)) {
 					uniqueMap[key] = uniqueKeys.length;
@@ -444,7 +444,7 @@
 				} else {
 					tempCanvas = originalCanvas;
 				}
-				
+
 				// Draw the final result into the packed context
 				packCtx.drawImage(tempCanvas, pos.x, pos.y);
 			});
@@ -455,6 +455,8 @@
 				const { x, y } = blueprint.placements[uniqIdx];
 				sub.setAttribute("x", x.toString());
 				sub.setAttribute("y", y.toString());
+				if (sub.hasAttribute("rotated"))
+					sub.removeAttribute("rotated");
 			});
 
 			// zip files need "blobs" to work ??? i dont know but okay
