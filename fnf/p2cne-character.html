@@ -92,7 +92,7 @@
 			var xmlOutput = "<!DOCTYPE codename-engine-character> <!-- Made with WizardMantis's Character Converter -->\n<character";
 
 			if (json.no_antialiasing) xmlOutput +=" antialiasing=\"false\"";
-			// image
+			if (json.image) xmlOutput += " sprite=\"" + json.image.replace("characters/", "") + "\"";
 			if (json.position[0] !== 0) xmlOutput += " x=\"" + json.position[0] + "\"";
 			if (json.position[1] !== 0) xmlOutput += " y=\"" + json.position[1] + "\"";
 			// icon
@@ -109,11 +109,11 @@
 				xmlOutput += "\t<anim";
 				xmlOutput += " name=\"" + a.anim + "\"";
 				xmlOutput += " anim=\"" + a.name + "\"";
-				if (a.offsets[0] !== 0)     xmlOutput += " x=\"" + a.offsets[0] + "\"";
-				if (a.offsets[1] !== 0)     xmlOutput += " y=\"" + a.offsets[1] + "\"";
-				if (a.fps !== 24)           xmlOutput += " fps=\"" + a.fps + "\"";
-				if (a.loop)                 xmlOutput += " loop=\"true\"";
-				if (a.indices.length !== 0) xmlOutput += " indices=\"" + a.indices.join(",") + "\"";
+				if ("offsets" in a && a.offsets[0] !== 0)     xmlOutput += " x=\"" + a.offsets[0] + "\"";
+				if ("offsets" in a && a.offsets && a.offsets[1] !== 0)     xmlOutput += " y=\"" + a.offsets[1] + "\"";
+				if ("fps" in a && a.fps && a.fps !== 24)           xmlOutput += " fps=\"" + a.fps + "\"";
+				if ("loop" in a && a.loop)                 xmlOutput += " loop=\"true\"";
+				if ("indices" in a && a.indices.length !== 0) xmlOutput += " indices=\"" + a.indices.join(",") + "\"";
 				xmlOutput += '/>\n'
 			});
 

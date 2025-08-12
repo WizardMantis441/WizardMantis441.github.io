@@ -10,7 +10,7 @@
 	}
 	</style>
 </head>
-<body><canvas id="canvas" width="400" height="720"></canvas></body>
+<body><canvas id="canvas" width="400" height="1080"></canvas></body>
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
 <script>
 	const canvas = document.getElementById('canvas');
@@ -212,7 +212,12 @@
 	}
 
 	function darken(hex, percent) { // all this is is if i put in "20" it's 20% darker lol
-	    let hsl = hexToHSL(hex);
+		// console.log(hex);
+		var c = hex;	
+		if (c == null)
+			c = '0000FF';
+
+	    let hsl = hexToHSL(c);
 	    hsl.l = Math.max(0, hsl.l - percent);
 	    return hslToHex(hsl.h, hsl.s, hsl.l);
 	}
@@ -275,13 +280,15 @@
 	}
 
 	ComfyJS.onChat = (user, message, flags, self, extra) => {
+		let colors = ['#00ffff', '#c24b99', '#f9393f', '#12fa05'];
 		notes.push({
-			x: Math.random() * (130 * 2) - 130, y: 400,
-			user: user, color: extra.userColor, message: message});
+			x: Math.random() * (130 * 2) - 130, y: innerHeight - boxImage.height,
+			user: user, color: colors[Math.floor(Math.random() * colors.length)], message: message
+		});
 	};
 	ComfyJS.Init("wizardmantis");
 
-	notes.push({x: 0, y: 400, user: "loaded", color: '#c24b99', message: "chat!"});
+	notes.push({x: 0, y: innerHeight - boxImage.height, user: "loaded", color: '#c24b99', message: "chat!"});
 
 	if (1 === 2) {
 		// awesome debug mode: spam chat with sick fucking notes
@@ -292,7 +299,7 @@
 
 		setInterval(() => {
 			notes.push({
-				x: Math.random() * (130 * 2) - 130, y: 400,
+				x: Math.random() * (130 * 2) - 130, y: innerHeight - boxImage.height,
 				user: names[Math.floor(Math.random() * names.length)],
 				color: colors[Math.floor(Math.random() * colors.length)],
 				message: messages[Math.floor(Math.random() * messages.length)]
