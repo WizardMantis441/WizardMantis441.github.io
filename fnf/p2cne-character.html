@@ -86,6 +86,18 @@
 			});
 		}
 
+		function RGBToHex(r, g, b) {
+			r = r.toString(16);
+			g = g.toString(16);
+			b = b.toString(16);
+
+			if (r.length == 1) r = "0" + r;
+			if (g.length == 1) g = "0" + g;
+			if (b.length == 1) b = "0" + b;
+
+			return r + g + b;
+		}
+
 		function convert(jsonInput) {
 			var json = JSON.parse(jsonInput);
 
@@ -95,9 +107,9 @@
 			if (json.image) xmlOutput += " sprite=\"" + json.image.replace("characters/", "") + "\"";
 			if (json.position[0] !== 0) xmlOutput += " x=\"" + json.position[0] + "\"";
 			if (json.position[1] !== 0) xmlOutput += " y=\"" + json.position[1] + "\"";
-			// icon
+			if (json.healthicon) xmlOutput += " icon=\"" + json.healthicon + "\"";
 			if (json.flip_x) xmlOutput += " flipX=\"true\"";
-			// healthbar
+			if (json.healthbar_colors) xmlOutput += " color=\"" + RGBToHex(json.healthbar_colors[0], json.healthbar_colors[1], json.healthbar_colors[2]) + "\"";
 			if (json.camera_position[0] !== 0) xmlOutput += " camx=\"" + json.camera_position[0] + "\"";
 			if (json.camera_position[1] !== 0) xmlOutput += " camy=\"" + json.camera_position[1] + "\"";
 			if (json.sing_duration !== 4) xmlOutput += " holdTime=\"" + json.sing_duration + "\"";
@@ -109,10 +121,10 @@
 				xmlOutput += "\t<anim";
 				xmlOutput += " name=\"" + a.anim + "\"";
 				xmlOutput += " anim=\"" + a.name + "\"";
-				if ("offsets" in a && a.offsets[0] !== 0)     xmlOutput += " x=\"" + a.offsets[0] + "\"";
-				if ("offsets" in a && a.offsets && a.offsets[1] !== 0)     xmlOutput += " y=\"" + a.offsets[1] + "\"";
-				if ("fps" in a && a.fps && a.fps !== 24)           xmlOutput += " fps=\"" + a.fps + "\"";
-				if ("loop" in a && a.loop)                 xmlOutput += " loop=\"true\"";
+				if ("offsets" in a && a.offsets && a.offsets[0] !== 0) xmlOutput += " x=\"" + (a.offsets[0] / (json.scale ? json.scale : 1)) + "\"";
+				if ("offsets" in a && a.offsets && a.offsets[1] !== 0) xmlOutput += " y=\"" + (a.offsets[1] / (json.scale ? json.scale : 1)) + "\"";
+				if ("fps" in a && a.fps && a.fps !== 24) xmlOutput += " fps=\"" + a.fps + "\"";
+				if ("loop" in a && a.loop) xmlOutput += " loop=\"true\"";
 				if ("indices" in a && a.indices.length !== 0) xmlOutput += " indices=\"" + a.indices.join(",") + "\"";
 				xmlOutput += '/>\n'
 			});
