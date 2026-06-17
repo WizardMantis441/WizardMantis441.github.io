@@ -1,0 +1,87 @@
+<!-- the calc in the name is short for calculator chat -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paypal Kofi Tax Calculator</title>
+</head>
+<body>
+	<fieldset>
+		<legend>Options</legend>
+		<label>What you want bro: <input value="10.00" id="whatYouWant"> (USD)</label>
+        <br>
+		<input type="checkbox" checked="true" id="doPaypalTax">Include Paypal Tax?</input>
+        <br>
+		<input type="checkbox" checked="true" id="doKoFiTax">Include KoFi Tax?</input>
+	</fieldset>
+    <h1>Normal Price (With Tax):</h1> <p id="normalPrice">$10.00</p>
+    <h1>How much was taxed:</h1> <p id="taxAmount">calculating...</p>
+    <h1>What you SHOULD charge:</h1> <p id="endPrice">calculating...</p>
+    <br>
+    <p>Cool Notes:</p>
+    <ul>
+        <li>kofi tax only applies to shop items/commission orders, tipping/donating doesn't get taxed</li>
+    </ul>
+</body>
+<script>
+    const wantedInput = document.getElementById('whatYouWant');
+    const doPaypalInput = document.getElementById('doPaypalTax');
+    const doKoFiInput = document.getElementById('doKoFiTax');
+
+    const normalPrice = document.getElementById('normalPrice');
+    const taxAmount = document.getElementById('taxAmount');
+    const endPrice = document.getElementById('endPrice');
+
+    function auraModeCalculate() {
+        let initPrice = parseFloat(wantedInput.value) || 0; // im just so clean heh!
+        let fanum = 0;
+
+        if (doPaypalInput.checked) {
+            // paypal: 4.4% + $0.30
+            fanum += (initPrice * 0.044) + 0.30;
+        }
+
+        if (doKoFiInput.checked) {
+            // kofi: 5%
+            fanum += initPrice * 0.05;
+        }
+
+        const finalPrice = initPrice + fanum;
+
+        normalPrice.textContent = "$" + initPrice.toFixed(2);
+        taxAmount.textContent = "$" + fanum.toFixed(2);
+        endPrice.textContent = "$" + finalPrice.toFixed(2);
+    }
+
+    wantedInput.addEventListener("change", auraModeCalculate);
+    doPaypalInput.addEventListener("change", auraModeCalculate);
+    doKoFiInput.addEventListener("change", auraModeCalculate);
+
+    // in case since theres the init 10 dollars as an example
+    auraModeCalculate();
+</script>
+</html>
+
+<!-- 
+from paige:
+
+PayPal takes a 4.4% fee, + 0.30 usd
+Ko-Fi then takes 5% through anything other than direct tips (so commissions, shop orders)
+
+so first, you take your intended price, let's say it's 20 
+you multiply it by the PayPal fee 
+20 * 4.4% = 0.88
+and then, you take the result, and add the 0.30 usd 
+0.88 + 0.30 = 1.18
+
+next, you do the same with the kofi fee, with the intended price
+20 * 5% = 1
+
+you take the total amount from both calculations
+1.18 + 1 = 2.18
+and that should Completely negate all the fees coming your way, so you get the amount you needed.
+
+20 + 2.18 = 22.18
+-->
