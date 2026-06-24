@@ -276,14 +276,30 @@
 			}
 		}
 
+		let areaShrunk = false;
+
 		for (let w = low; w <= high; w++) {
 			const h = packHeight(w);
 			const area = w * h;
 			if (area < bestArea) {
+				areaShrunk = true;
 				bestArea = area;
 				bestW = w;
 				bestH = h;
 			}
+		}
+
+		// special case: if the shrinking algorithm hasnt run at all, position the frames in a grid-like pattern
+		if (!areaShrunk)
+		{
+			let rows = Math.ceil(Math.sqrt(boxes.length));
+			let totalW = 0;
+			for (let i = totalW; i < rows; i++)
+			{
+				totalW += widths[i];
+			}
+
+			bestW = totalW;
 		}
 
 		const [finalH, rawPlacements] = makeLayout(bestW);
