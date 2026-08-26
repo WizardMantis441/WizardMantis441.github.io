@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<meta lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>wizard spritesheet packer 2</title>
+</head>
+<body>
+	<p>howdy</p>
+
+	<input type="file" id="filePngInput">Input Spritesheet PNG</input>
+	<br>
+	<input type="file" id="fileXmlInput">Input Spritesheet XML</input>
+	<br>
+
+	<input type="file" id="folderInput" webkitdirectory>Input Folder (warning: very recursive!)</input>
+	<br>
+</body>
+</html>
+<script type="module">
+	import rectpack from 'https://cdn.jsdelivr.net/npm/rectpack@1.0.11/+esm'
+
+	const filePngInput = document.getElementById('filePngInput');
+	const fileXmlInput = document.getElementById('fileXmlInput');
+	const folderInput = document.getElementById('folderInput');
+
+	window.addEventListener('pageshow', function() {
+		filePngInput.value = '';
+		fileXmlInput.value = '';
+		folderInput.value = '';
+	});
+
+	let pngFile = null;
+	let xmlFile = null;
+
+	filePngInput.addEventListener('change', (event) => {
+		const file = event.target.files[0];
+		if (file && file.type === 'image/png') pngFile = file;
+		else alert('bro das not no PNG FILE dawg ayo nahhhh bro sus');
+
+		if (pngFile && xmlFile && pngFile.name.replace(/\.png$/i, "") === xmlFile.name.replace(/\.xml$/i, "")) parseSpritesheet(pngFile, xmlFile);
+	});
+
+	fileXmlInput.addEventListener('change', (event) => {
+		const file = event.target.files[0];
+		if (file && file.type === 'text/xml') xmlFile = file;
+		else alert('bro das not no XML FILE dawg ayo nahhhh bro sus');
+
+		if (pngFile && xmlFile && pngFile.name.replace(/\.png$/i, "") === xmlFile.name.replace(/\.xml$/i, "")) parseSpritesheet(pngFile, xmlFile);
+	});
+
+	folderInput.addEventListener('change', (event) => {
+		const files = event.target.files;
+		for (let i = 0; i < files.length; i++) {
+			console.log('File:', files[i].webkitRelativePath);
+			if (files[i].type != 'image/png') continue;
+
+			if (files[i].webkitRelativePath.endsWith('.png')) {
+				const xmlFilePath = files[i].webkitRelativePath.replace(/\.png$/i, '.xml');
+				const xmlFile = Array.from(files).find(f => f.webkitRelativePath === xmlFilePath);
+				
+				if (xmlFile) {
+					parseSpritesheet(files[i], xmlFile);
+				} else {
+					console.warn('no xml for', files[i].webkitRelativePath);
+				}
+			}
+		}
+	});
+
+	function parseSpritesheet(pngFile, xmlFile) {
+		console.log('Parsing spritesheet:', pngFile.name, xmlFile.name);
+
+		const boxes = [
+			{ w: 50, h: 50 },
+			{ w: 20, h: 30 },
+			{ w: 50, h: 30 },
+			{ w: 10, h: 10 }
+		];
+
+		var rectsPacked = rectpack.RP(boxes, {padding: 0});
+		console.log(rectsPacked);
+	}
+
+	import potpack from 'https://cdn.jsdelivr.net/npm/potpack@2.1.0/+esm'
+
+	// function packImage() {
+	// 	const boxes = [
+	// 		{ w: 50, h: 50 },
+	// 		{ w: 20, h: 30 },
+	// 		{ w: 50, h: 30 },
+	// 		{ w: 10, h: 10 }
+	// 	];
+
+	// 	// const { w, h, items } = potpack(boxes);
+	// 	const result = potpack(boxes);
+
+	// 	console.log(`Container size: ${result.w}x${result.h}`);
+	// 	console.log("Packed items with coordinates:", boxes);
+	// }
+</script>
+<style>
+	/* @font-face {
+		font-family: 'FunkinOptions';
+		src: url(../fnf-options.otf) format('opentype');
+		color: rgba(253, 253, 253);
+	}
+
+	body {
+		background-color: rgba(36, 34, 41);
+		font-family: FunkinOptions, sans-serif;
+		color: rgba(253, 253, 253);
+	} */
+</style>
