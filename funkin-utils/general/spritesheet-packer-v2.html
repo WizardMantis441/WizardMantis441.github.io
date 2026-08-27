@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>wizard spritesheet packer 2</title>
+</head>
+<body>
+	<p>howdy</p>
+	<p>TODO: look into it clipping?? frameWidth / frameHeight is def the problem</p>
+	<p>TODO: rotated sprites are not being parsed correctly</p>
+
+	<label>Input Spritesheet PNG <input type="file" id="filePngInput"></label>
+	<br>
+	<label>Input Spritesheet XML <input type="file" id="fileXmlInput"></label>
+	<br>
+	<br>
+	<label>Input Folder (warning: very recursive!) <input type="file" id="folderInput" webkitdirectory></label>
+	<br>
+	<br>
+
+	<div id="log"></div>
+
+	<script type="module">
+		import { MaxRectsPacker } from 'https://cdn.jsdelivr.net/npm/maxrects-packer@2.7.3/+esm';
+		import JSZip from 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm';
+
+		const filePngInput = document.getElementById('filePngInput');
+		const fileXmlInput = document.getElementById('fileXmlInput');
+		const folderInput = document.getElementById('folderInput');
+		const logElement = document.getElementById('log');
+
+		window.addEventListener('pageshow', function () {
+			filePngInput.value = '';
+			fileXmlInput.value = '';
+			folderInput.value = '';
+		});
+
+		let pngFile = null;
+		let xmlFile = null;
+
+		async function parseSpritesheet(pngFile, xmlFile) {
+			const baseName = pngFile.name.replace(/\.png$/i, '');
+
+			const image = new Image();
+			const pngURL = URL.createObjectURL(pngFile);
+			await new Promise((resolve) => { image.onload = resolve; image.src = pngURL; });
+
+			const xmlText = await xmlFile.text();
+			const xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+			const root = xmlDoc.querySelector('TextureAtlas');
+			const subTextures = xmlDoc.querySelectorAll('SubTexture');
+
+			const oldWidth = image.width;
+			const oldHeight = image.height;
+			const oldFrameCount = subTextures.length;
+
+			const tempCanvas = document.createElement('canvas');
+			const tempCanvasCtx = tempCanvas.getContext('2d');
+
+			const uniqueFrames = new Map(); // get rid of duplicate frames that have the same x y w h rot
+			const allFrames = [];
+
+			for (const st of subTextures) {
+				const name = st.getAttribute('name');
+				const x = parseInt(st.getAttribute('x'));
+				const y = parseInt(st.getAttribute('y'));
+				const w = parseInt(st.getAttribute('width'));
+				const h = parseInt(st.getAttribute('height'));
+				const rotated = st.getAttribute('rotated') ?? 'false' === 'true';
+
+				const frameX = parseInt(st.getAttribute('frameX') ?? 0);
+				const frameY = parseInt(st.getAttribute('frameY') ?? 0);
+				const frameWidth = parseInt(st.getAttribute('frameWidth') ?? w);
+				const frameHeight = parseInt(st.getAttribute('frameHeight') ?? h);
+
+				const key = `${x},${y},${w},${h},${rotated}`; // lowk unique medias in the stew going on here
+
+				if (!uniqueFrames.has(key)) {
+					const realW = rotated ? h : w;
+					const realH = rotated ? w : h;
+
+					tempCanvas.width = realW;
+					tempCanvas.height = realH;
+					
+					tempCanvasCtx.clearRect(0, 0, realW, realH);
+					tempCanvasCtx.save();
+					
+					if (rotated) {
+						tempCanvasCtx.translate(0, realH);
+						tempCanvasCtx.rotate(-Math.PI / 2); // DIE
+					}
+
+					tempCanvasCtx.drawImage(image, x, y, w, h, 0, 0, w, h);
+					tempCanvasCtx.restore();
+
+					const spriteImg = new Image();
+					spriteImg.src = tempCanvas.toDataURL();
+					await new Promise((resolve) => { spriteImg.onload = resolve; });
+					// const spriteBitmap = await createImageBitmap(tempCanvas);
+					// uniqueFrames.set(key, { key, width: realW, height: realH, img: spriteBitmap });
+					uniqueFrames.set(key, { key, width: realW, height: realH, img: spriteImg });
+				}
+
+				allFrames.push({ name, key, frameX, frameY, frameWidth, frameHeight });
+			}
+
+			const packer = new MaxRectsPacker(8192, 8192, 0, { pot: false, allowRotation: true });
+			packer.addArray([...uniqueFrames.values()].map(s => ({ width: s.width, height: s.height, data: s })));
+			const bin = packer.bins[0];
+
+			const tempCanvas2 = document.createElement('canvas');
+			tempCanvas2.width = bin.width;
+			tempCanvas2.height = bin.height;
+			const tempCanvasCtx2 = tempCanvas2.getContext('2d');
+
+			const packedRectsByKey = new Map();
+
+			for (const rect of bin.rects) {
+				const sprite = rect.data;
+
+				tempCanvasCtx2.save();
+				if (rect.rot) {
+					tempCanvasCtx2.translate(rect.x + rect.width, rect.y);
+					tempCanvasCtx2.rotate(Math.PI / 2);
+					tempCanvasCtx2.drawImage(sprite.img, 0, 0);
+				} else {
+					tempCanvasCtx2.drawImage(sprite.img, rect.x, rect.y);
+				}
+				tempCanvasCtx2.restore();
+
+				packedRectsByKey.set(sprite.key, {
+					x: rect.x, y: rect.y,
+					width: rect.width,
+					height: rect.height,
+					rotated: rect.rot === true
+				});
+			}
+
+			const outXmlLines = [
+				`<TextureAtlas imagePath="${baseName}.png" width="${bin.width}" height="${bin.height}">`
+			];
+
+			for (const entry of allFrames) {
+				const r = packedRectsByKey.get(entry.key);
+				outXmlLines.push(
+					`  <SubTexture name="${entry.name}"` +
+					` x="${r.x}" y="${r.y}" width="${r.width}" height="${r.height}"` +
+					(r.rotated ? ` rotated="true"` : ``) +
+					` frameX="${entry.frameX}" frameY="${entry.frameY}" frameWidth="${entry.frameWidth}" frameHeight="${entry.frameHeight}"/>`
+				);
+			}
+
+			outXmlLines.push(`</TextureAtlas>`);
+
+			const pngBlob = await new Promise((resolve) => tempCanvas2.toBlob(resolve, 'image/png'));
+
+			const oldMem = calculationMethodOfHowToGetHowMuchMemoryASpriteTakesBasedOnWidthAndHeight(oldWidth, oldHeight);
+			const newMem = calculationMethodOfHowToGetHowMuchMemoryASpriteTakesBasedOnWidthAndHeight(bin.width, bin.height);
+			const newFrameCount = allFrames.length;
+			const uniqueCount = uniqueFrames.size;
+
+			if (bin.width * bin.height >= oldWidth * oldHeight) {
+				log(`Compressing \`${baseName}\` did nothing im just so fucking sorry ok (Old: ${oldWidth}x${oldHeight} [${oldMem}MB], ${uniqueCount}/${oldFrameCount} unique frames)`);
+			} else {
+				log(`Compressed \`${baseName}\` (Old: ${oldFrameCount} frames, ${oldWidth}x${oldHeight} [${oldMem}MB]) (New: ${uniqueCount} unique frames, ${bin.width}x${bin.height} [${newMem}MB])`);
+			}
+
+			return { name: baseName, pngBlob, xmlText: outXmlLines.join('\n') };
+		}
+
+		function download(name, blob) {
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = name;
+			a.click();
+			URL.revokeObjectURL(url);
+		}
+
+		async function downloadSingleZip({ name, pngBlob, xmlText }) {
+			const zip = new JSZip();
+			zip.file(`${name}.png`, pngBlob);
+			zip.file(`${name}.xml`, xmlText);
+			const blob = await zip.generateAsync({ type: 'blob' });
+			download(`${name}.zip`, blob);
+		}
+
+		async function downloadMegaZipFile(results) {
+			const zip = new JSZip();
+			for (const { name, pngBlob, xmlText } of results) {
+				const folder = zip.folder(name);
+				folder.file(`${name}.png`, pngBlob);
+				folder.file(`${name}.xml`, xmlText);
+			}
+			const blob = await zip.generateAsync({ type: 'blob' });
+			download(`optimized.zip`, blob);
+		}
+
+		async function tryParseSinglePair() {
+			if (pngFile && xmlFile && pngFile.name.replace(/\.png$/i, "") === xmlFile.name.replace(/\.xml$/i, "")) {
+				const result = await parseSpritesheet(pngFile, xmlFile);
+				await downloadSingleZip(result);
+
+				pngFile = null;
+				xmlFile = null;
+				filePngInput.value = '';
+				fileXmlInput.value = '';
+			}
+		}
+
+		filePngInput.addEventListener('change', (event) => {
+			const file = event.target.files[0];
+			if (file && file.type === 'image/png') pngFile = file;
+			else alert('bro das not no PNG FILE dawg ayo nahhhh bro sus');
+			tryParseSinglePair();
+		});
+
+		fileXmlInput.addEventListener('change', (event) => {
+			const file = event.target.files[0];
+			if (file && file.type === 'text/xml') xmlFile = file;
+			else alert('bro das not no XML FILE dawg ayo nahhhh bro sus');
+			tryParseSinglePair();
+		});
+
+		folderInput.addEventListener('change', async (event) => {
+			const files = event.target.files;
+			const results = [];
+
+			for (let i = 0; i < files.length; i++) {
+				if (files[i].type !== 'image/png') continue;
+				if (!files[i].webkitRelativePath.endsWith('.png')) continue;
+
+				const xmlFilePath = files[i].webkitRelativePath.replace(/\.png$/i, '.xml');
+				const matchedXml = Array.from(files).find(f => f.webkitRelativePath === xmlFilePath);
+				if (!matchedXml) {
+					log(`no xml for ${files[i].webkitRelativePath}`);
+					continue;
+				}
+
+				log(`im going to compress ${files[i].webkitRelativePath}...`);
+				const result = await parseSpritesheet(files[i], matchedXml);
+				results.push(result);
+			}
+
+			if (results.length > 0) await downloadMegaZipFile(results);
+		});
+
+		function log(text) {
+			console.log(text);
+			const line = document.createElement('div');
+			line.textContent = text;
+			logElement.appendChild(line);
+			logElement.scrollTop = logElement.scrollHeight;
+		}
+
+		function calculationMethodOfHowToGetHowMuchMemoryASpriteTakesBasedOnWidthAndHeight(width, height) {
+			// return (width * height * 4 / 1024 / 1024).toFixed(2);
+			// thank u data for good name and good math. i love you data5.
+			return (width * height * 4 / 1000 / 1000).toFixed(2);
+		}
+	</script>
+</body>
+</html>
