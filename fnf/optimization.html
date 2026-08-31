@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>How to Optimize</title>
+</head>
+<body>
+	<h6>todo: funkin sovl</h6>
+	<!-- <h6>TODO: EXPERIMENT WITH MAKING THIS FNF STYLED LIKE THE MOD MENU, maybe ask ash or paige for mockups?</h6> -->
+
+	<h2>"i would like to optimize my fnf mod"</h2>
+
+	<p>that's cool!</p>
+	<p>we should probably be a little bit more specific, so i'm gonna go pretty in detail with how things work so that hopefully you can take whatever you want and use it hooray</p>
+
+	<h1>part 1: images</h1>
+	
+	<p>there two different types of optimization we can do, either <strong>memory usage</strong> optimization, or <strong>file size</strong> optimization. keep in mind that these are two different things that don't correlate too much to each other!</p>
+
+	<h2>"but if the file is smaller, doesn't that mean less is loaded?"</h2>
+
+	<p>well, yes, but actually no (ebk)</p>
+
+	<p>while file size cool and all, the goal of optimization is to make sure that whatever engine you are using can actually handle all of the things you want to do. if you want flashy high def sprites, that's cool, but everything comes at a cost, and you need to find a perfect middle ground of what looks cool and what is worth making everybody's computer run. i love shaders as much as the next guy, but if the next guy is someone with a really poor GPU then he actually freaking hates you.</p>
+
+	<p>when you "optimize" your images through something like <a href="https://github.com/oxipng/oxipng">oxipng</a> to compress images, you're only compressing the file size of the image, not what is actually loaded into memory. the VRAM indicator you see on top of most fnf builds indicate how many <strong>MB</strong> worth of images it is having to hold in memory, and the more it holds the more strain is being put on the program to run.</p>
+	<ul>
+		<li>MB: Megabytes (1,000,000 or 10^6 bytes)</li>
+		<li>Mb: Megabits (1,000,000 or 10^6 bits), [8x smaller than a MB!]</li>
+		<li>MiB: Mebibytes (1,048,576 or 2^20 bytes), calculated using base 2, because computers especially love factors of 2</li>
+	</ul>
+
+	<!-- TODO: little thing to show how to calculate memory -->
+
+	<p>for optimizing memory usage, you need to actually compress what the vram is holding, and the best way to do that is to tinker with the <strong>resolution</strong> of any images being loaded. this involves:</p>
+	<ul>
+		<li>trimming out as much transparent space as you can</li>
+		<li>scaling down images as much as you can</li>
+		<li>using the least amount of images</li>
+	</ul>
+
+	<p>if you've been wondering why adobe texture atlases are the new big priority in fnf modding, this is because it manages to hit all three bullet points at the same time! WOW!</p>
+
+	<p>to demonstrate, here are two exports of the default boyfriend, including only the animations `idle`, `left`, `down`, `up`, and `right`. those are the average animations every character is going to have, so this will be our sanity check.</p>
+
+	<h1>TODO EXPORT BOTH EXAMPLES WHEN I GET HOME, also indicate their resolutions, file size, and memory usage</h1>
+
+	<table>
+		<caption>notice the differences 👀 (harold is my template)</caption>
+		<tbody>
+			<tr>
+				<td>
+					<img src="./../harold-nobg.png" class="transparency-grid"/>
+				</td>
+				<td>
+					<img src="./../harold-nobg.png" class="transparency-grid" style="filter: hue-rotate(90deg); width: 50%; height: 50%;"/>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Harold (42780x94), 4MB file size, 92GB VRAM
+				</td>
+				<td>
+					Hulk Harold (42780x95), 4MB file size, 92GB VRAM
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<p>immediately we can see a huge difference. the sparrow atlas has a lot of extra padding at the bottom, and is insanely larger than the texture atlas. note that these were export with the same settings, just different formats!</p>
+
+	<p>since the texture atlas is smaller, this is admittedly our best bet when it comes to anything animated with symbols.</p>
+
+	<p>TODO: talk about the bin packing algorithm</p>
+
+	<p>TODO: talk about file size compression (oxipng + how to use)</p>
+
+	<h1>part 2: audio</h1>
+	<p>TODO: talk about differences between file formats (mp3, ogg, wav, flac)</p>
+	<p>TODO: how to convert file formats + the mp3 stinky start</p>
+	<p>TODO: how to compress audio (ffmpeg probably)</p>
+
+	<h1>part 3: video</h1>
+	<p>TODO: off the top of my head talk about compression (ffmpeg) and maybe streaming but that's a bit scary, look into dis</p>
+</body>
+<script>
+	function getMemoryUsage(width, height) {
+		return 0.0
+	}
+</script>
+<style>
+	.transparency-grid {
+		background-image: 
+			linear-gradient(45deg, #aaa 25%, transparent 25%), 
+			linear-gradient(-45deg, #aaa 25%, transparent 25%), 
+			linear-gradient(45deg, transparent 75%, #aaa 75%), 
+			linear-gradient(-45deg, transparent 75%, #aaa 75%);
+		background-size: 20px 20px;
+		background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+
+		display: inline-block;
+		padding: 0px;
+		margin: 0px;
+		border: 1px solid #999;
+	}
+
+	.transparency-grid img {
+		display: block;
+		max-width: 100%;
+	}
+
+	table {
+		text-align: center;
+	}
+</style>
+</html>
